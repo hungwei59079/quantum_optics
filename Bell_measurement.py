@@ -7,7 +7,7 @@ math.change_backend(
 import mrmustard.lab as lab
 import numpy as np
 
-from optics_utils import explain_circuit, state_to_braket
+from display_utils import explain_circuit, state_to_braket
 
 # ============================================================
 # BELL STATE MEASUREMENT APPARATUS (for quantum teleportation)
