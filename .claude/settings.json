@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"from mrmustard.lab import circuit_drawer; print\\(dir\\(circuit_drawer\\)\\)\")",
+      "Bash(timeout 30 python3 main.py)"
+    ]
+  }
+}
