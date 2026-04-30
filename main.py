@@ -60,8 +60,8 @@ print()
 #   |H>_A |V>_B = |1,0,0,1>
 #   |V>_A |H>_B = |0,1,1,0>
 ket = np.zeros((2, 2, 2, 2), dtype=complex)
-ket[1, 0, 0, 1] = 1 / np.sqrt(2)
-ket[0, 1, 1, 0] = -1 / np.sqrt(2)
+ket[1, 0, 1, 0] = 1 / np.sqrt(2)
+ket[0, 1, 0, 1] = - 1 / np.sqrt(2)
 psi_plus = lab.State(ket=ket)
 
 # --- Apply the circuit and read joint photon-number probabilities --
@@ -77,11 +77,15 @@ def p(a_h, a_v, b_h, b_v):
 print("=" * 60)
 print(f"INPUT: {state_to_braket(psi_plus, [2, 2, 2, 2], mode_groups)}")
 print("=" * 60)
-print(f"  Both clicks in arm A (A_H & A_V): {p(1,1,0,0)*100:6.2f}%")
-print(f"  Both clicks in arm B (B_H & B_V): {p(0,0,1,1)*100:6.2f}%")
-print(f"  Split: A_H & B_V                : {p(1,0,0,1)*100:6.2f}%")
-print(f"  Split: A_V & B_H                : {p(0,1,1,0)*100:6.2f}%")
+print(f"Output state: {state_to_braket(output_state, [3, 3, 3, 3], mode_groups)}")
 print()
-print("Output state in braket notation:")
-print(f"  {state_to_braket(output_state, [3, 3, 3, 3], mode_groups)}")
+same_arm  = p(1,1,0,0) + p(0,0,1,1)
+split_arm = p(1,0,0,1) + p(0,1,1,0)
+print("Detection probabilities:")
+print(f"  [Psi+  signature] Same arm  (A_H+A_V or B_H+B_V): {same_arm*100:6.2f}%")
+print(f"    arm A (A_H+A_V): {p(1,1,0,0)*100:6.2f}%")
+print(f"    arm B (B_H+B_V): {p(0,0,1,1)*100:6.2f}%")
+print(f"  [Psi-  signature] Split arms (A_H+B_V or A_V+B_H): {split_arm*100:6.2f}%")
+print(f"    A_H+B_V        : {p(1,0,0,1)*100:6.2f}%")
+print(f"    A_V+B_H        : {p(0,1,1,0)*100:6.2f}%")
 
