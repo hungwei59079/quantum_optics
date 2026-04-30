@@ -42,10 +42,6 @@ bell_AB[1, 0, 1, 0] =  1 / np.sqrt(2)   # |H>_A |H>_B
 bell_AB[0, 1, 0, 1] = -1 / np.sqrt(2)   # |V>_A |V>_B
 
 # --- Full input state |psi>_C ⊗ |Bell>_AB on six modes ------------
-# Modes 0-3 are padded to dimension 3 (not 2) so the Fock space has
-# room for 2-photon states that arise after the BS (HOM bunching).
-# Without this, mrmustard truncates at index 1 and the bunched
-# outcomes |2,0,0,0>, |0,2,0,0>, etc. are all silently zeroed out.
 input_ket = np.zeros((3, 3, 3, 3, 2, 2), dtype=complex)
 input_ket[:2, :2, :2, :2, :, :] = np.einsum("ij,klmn->ijklmn", psi_C, bell_AB)
 input_state = lab.State(ket=input_ket)
@@ -79,8 +75,28 @@ print()
 output_state = input_state >> circuit
 out_ket = np.asarray(output_state.ket(cutoffs=[3, 3, 3, 3, 2, 2]))
 
+def apply_X(ket):
+    """X on Bob's polarization qubit: swap |H> and |V>."""
+    return np.swapaxes(ket, 0, 1)
+
+def apply_Z(ket):
+    """Z on Bob's polarization qubit: phase flip on |V>."""
+    new_ket = ket.copy()
+    new_ket[:, 1] *= -1
+    return new_ket
+
+# Derived for resource state |Phi-> = (|HH> - |VV>)/sqrt(2).
+# Bunched outcomes (Phi+/Phi- ambiguous in this BS-only scheme) get
+# no entry: no single Pauli correction recovers |psi> from them.
+corrections = {
+    (1, 0, 0, 1): ("X",),
+    (0, 1, 1, 0): ("X",),
+    (1, 1, 0, 0): ("X", "Z"),  # apply X first, then Z
+    (0, 0, 1, 1): ("Z", "X"),  # apply Z first, then X
+}
+
 print("=" * 60)
-print("Outcomes |n_C_H, n_C_V, n_A_H, n_A_V> and Bob's conditional state:")
+print("Outcomes |n_C_H, n_C_V, n_A_H, n_A_V> -- Bob raw, then post-correction:")
 print("=" * 60)
 
 threshold = 1e-6
@@ -94,10 +110,23 @@ for n0, n1, n2, n3 in np.ndindex(3, 3, 3, 3):
         continue
     total_p += prob
     cond_ket = sub / np.sqrt(prob)
-    bob_state = lab.State(ket=cond_ket)
-    bob_braket = state_to_braket(bob_state, [2, 2], [[0, 1]])
+    raw_braket = state_to_braket(lab.State(ket=cond_ket), [2, 2], [[0, 1]])
     outcome = f"|{n0},{n1},{n2},{n3}>"
-    print(f"  {outcome:<13} P={prob*100:6.2f}%   Bob -> {bob_braket}")
+    print(f"  {outcome:<13} P={prob*100:6.2f}%   raw : {raw_braket}")
+
+    key = (n0, n1, n2, n3)
+    if key in corrections:
+        ops = corrections[key]
+        corr_ket = cond_ket
+        for op in ops:
+            corr_ket = apply_X(corr_ket) if op == "X" else apply_Z(corr_ket)
+        corr_braket = state_to_braket(
+            lab.State(ket=corr_ket), [2, 2], [[0, 1]],
+        )
+        ops_str = " then ".join(ops)
+        print(f"  {'':<13}                apply {ops_str}: {corr_braket}")
+    else:
+        print(f"  {'':<13}                [Phi+/Phi- ambiguous -- no Pauli correction recovers |psi>]")
 
 print()
 print(f"Total probability over listed outcomes: {total_p*100:6.2f}%")
