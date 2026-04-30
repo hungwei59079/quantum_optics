@@ -1,9 +1,13 @@
 from mrmustard import math
-math.change_backend("tensorflow")  # numpy backend lacks `convolution`, needed by PNRDetector
+
+math.change_backend(
+    "tensorflow"
+)  # numpy backend lacks `convolution`, needed by PNRDetector
 
 import mrmustard.lab as lab
 import numpy as np
-from mrmustard.lab import circuit_drawer
+
+from optics_utils import explain_circuit, state_to_braket
 
 # ============================================================
 # BELL STATE MEASUREMENT APPARATUS (for quantum teleportation)
@@ -22,8 +26,8 @@ from mrmustard.lab import circuit_drawer
 
 # 50/50 beam splitter, polarization-preserving:
 # acts independently on the H pair (0,2) and the V pair (1,3).
-bs_H = lab.BSgate(theta=np.pi/4)
-bs_V = lab.BSgate(theta=np.pi/4)
+bs_H = lab.BSgate(theta=np.pi / 4)
+bs_V = lab.BSgate(theta=np.pi / 4)
 
 # Four photon-number-resolving detectors, one per output mode.
 det_AH = lab.PNRDetector(modes=[0])
@@ -33,17 +37,22 @@ det_BV = lab.PNRDetector(modes=[3])
 
 # --- Circuit -----------------------------------------------------
 
-circuit = lab.Circuit([
-    bs_H[0, 2],
-    bs_V[1, 3],
-])
+circuit = lab.Circuit(
+    [
+        bs_H[0, 2],
+        bs_V[1, 3],
+    ]
+)
+
+mode_labels = ["A_H", "A_V", "B_H", "B_V"]
+mode_groups = [[0, 1], [2, 3]]  # arm A: modes 0,1 (H,V); arm B: modes 2,3 (H,V)
 
 print("=" * 60)
 print("BELL STATE MEASUREMENT APPARATUS")
 print("=" * 60)
-print(circuit_drawer.circuit_text(circuit.ops))
+explain_circuit(circuit, mode_labels)
 print()
-print("Detectors: PNR on modes 0 (A_H), 1 (A_V), 2 (B_H), 3 (B_V)")
+print("Detectors: PNR on each mode")
 print()
 
 # --- Input state: |Psi+> = (|HV> + |VH>) / sqrt(2) ---------------
@@ -52,7 +61,7 @@ print()
 #   |V>_A |H>_B = |0,1,1,0>
 ket = np.zeros((2, 2, 2, 2), dtype=complex)
 ket[1, 0, 0, 1] = 1 / np.sqrt(2)
-ket[0, 1, 1, 0] = 1 / np.sqrt(2)
+ket[0, 1, 1, 0] = -1 / np.sqrt(2)
 psi_plus = lab.State(ket=ket)
 
 # --- Apply the circuit and read joint photon-number probabilities --
@@ -60,13 +69,19 @@ output_state = psi_plus >> circuit
 # cutoff 3 per mode lets us also see Phi-state outcomes (2 photons in one mode)
 probs = output_state.fock_probabilities(cutoffs=[3, 3, 3, 3])
 
+
 def p(a_h, a_v, b_h, b_v):
     return float(probs[a_h, a_v, b_h, b_v])
 
+
 print("=" * 60)
-print("INPUT: |Psi+> = (|HV> + |VH>) / sqrt(2)")
+print(f"INPUT: {state_to_braket(psi_plus, [2, 2, 2, 2], mode_groups)}")
 print("=" * 60)
 print(f"  Both clicks in arm A (A_H & A_V): {p(1,1,0,0)*100:6.2f}%")
 print(f"  Both clicks in arm B (B_H & B_V): {p(0,0,1,1)*100:6.2f}%")
 print(f"  Split: A_H & B_V                : {p(1,0,0,1)*100:6.2f}%")
 print(f"  Split: A_V & B_H                : {p(0,1,1,0)*100:6.2f}%")
+print()
+print("Output state in braket notation:")
+print(f"  {state_to_braket(output_state, [3, 3, 3, 3], mode_groups)}")
+
