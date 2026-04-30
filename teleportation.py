@@ -8,6 +8,7 @@ import mrmustard.lab as lab
 import numpy as np
 
 from display_utils import explain_circuit, state_to_braket
+from teleportation_utils import bell_measurement
 
 # ============================================================
 # QUANTUM TELEPORTATION
@@ -47,23 +48,20 @@ input_ket[:2, :2, :2, :2, :, :] = np.einsum("ij,klmn->ijklmn", psi_C, bell_AB)
 input_state = lab.State(ket=input_ket)
 
 # --- Bell measurement apparatus on (C, A) -------------------------
+phi_error = np.pi / 10
+ps_H = lab.Rgate(angle=phi_error)
 bs_H = lab.BSgate(theta=np.pi / 4)
 bs_V = lab.BSgate(theta=np.pi / 4)
 circuit = lab.Circuit([
-    bs_H[0, 2],   # mix C_H with A_H
-    bs_V[1, 3],   # mix C_V with A_V
+    ps_H[0],     # relative phase error on C_H only (e^{i*phi}*alpha|H> + beta|V>)
+    bs_H[0, 2],  # mix C_H with A_H
+    bs_V[1, 3],  # mix C_V with A_V
 ])
 
 mode_labels = ["C_H", "C_V", "A_H", "A_V", "B_H", "B_V"]
 mode_groups = [[0, 1], [2, 3], [4, 5]]
 
-print("=" * 60)
-print("QUANTUM TELEPORTATION (Bell measurement on C and A)")
-print("=" * 60)
 explain_circuit(circuit, mode_labels)
-print()
-print("Detectors: PNR on modes 0..3 (C_H, C_V, A_H, A_V)")
-print()
 print(f"State to teleport: |psi>_C = {alpha.real:.4f} |H> + {beta.real:.4f} |V>")
 print()
 input_braket = state_to_braket(input_state, [2, 2, 2, 2, 2, 2], mode_groups)
@@ -75,58 +73,4 @@ print()
 output_state = input_state >> circuit
 out_ket = np.asarray(output_state.ket(cutoffs=[3, 3, 3, 3, 2, 2]))
 
-def apply_X(ket):
-    """X on Bob's polarization qubit: swap |H> and |V>."""
-    return np.swapaxes(ket, 0, 1)
-
-def apply_Z(ket):
-    """Z on Bob's polarization qubit: phase flip on |V>."""
-    new_ket = ket.copy()
-    new_ket[:, 1] *= -1
-    return new_ket
-
-# Derived for resource state |Phi-> = (|HH> - |VV>)/sqrt(2).
-# Bunched outcomes (Phi+/Phi- ambiguous in this BS-only scheme) get
-# no entry: no single Pauli correction recovers |psi> from them.
-corrections = {
-    (1, 0, 0, 1): ("X",),
-    (0, 1, 1, 0): ("X",),
-    (1, 1, 0, 0): ("X", "Z"),  # apply X first, then Z
-    (0, 0, 1, 1): ("Z", "X"),  # apply Z first, then X
-}
-
-print("=" * 60)
-print("Outcomes |n_C_H, n_C_V, n_A_H, n_A_V> -- Bob raw, then post-correction:")
-print("=" * 60)
-
-threshold = 1e-6
-total_p = 0.0
-for n0, n1, n2, n3 in np.ndindex(3, 3, 3, 3):
-    if n0 + n1 + n2 + n3 != 2:
-        continue  # photon-number conservation: 2 photons land on the C/A side
-    sub = out_ket[n0, n1, n2, n3, :, :]
-    prob = float(np.sum(np.abs(sub) ** 2))
-    if prob < threshold:
-        continue
-    total_p += prob
-    cond_ket = sub / np.sqrt(prob)
-    raw_braket = state_to_braket(lab.State(ket=cond_ket), [2, 2], [[0, 1]])
-    outcome = f"|{n0},{n1},{n2},{n3}>"
-    print(f"  {outcome:<13} P={prob*100:6.2f}%   raw : {raw_braket}")
-
-    key = (n0, n1, n2, n3)
-    if key in corrections:
-        ops = corrections[key]
-        corr_ket = cond_ket
-        for op in ops:
-            corr_ket = apply_X(corr_ket) if op == "X" else apply_Z(corr_ket)
-        corr_braket = state_to_braket(
-            lab.State(ket=corr_ket), [2, 2], [[0, 1]],
-        )
-        ops_str = " then ".join(ops)
-        print(f"  {'':<13}                apply {ops_str}: {corr_braket}")
-    else:
-        print(f"  {'':<13}                [Phi+/Phi- ambiguous -- no Pauli correction recovers |psi>]")
-
-print()
-print(f"Total probability over listed outcomes: {total_p*100:6.2f}%")
+bell_measurement(out_ket, "Phi_minus", psi_C)

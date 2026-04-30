@@ -4,6 +4,7 @@ from mrmustard.lab import circuit_drawer
 
 def explain_circuit(circuit, mode_labels):
     """Print the circuit diagram with a mode legend and per-gate annotation."""
+    print("=" * 60)
     print("Mode legend:")
     for i, label in enumerate(mode_labels):
         print(f"  {i}: {label}")
@@ -15,6 +16,7 @@ def explain_circuit(circuit, mode_labels):
     print()
     print("Diagram:")
     print(circuit_drawer.circuit_text(circuit.ops))
+    print()
 
 
 def _format_coefficient(amp, decimals, threshold, is_first):
