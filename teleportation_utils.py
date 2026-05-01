@@ -36,8 +36,8 @@ corrections = {
 }
 
 
-def bell_measurement(out_ket, resource_type, psi_C, threshold=1e-6):
-    """Print Bell-measurement outcomes, Bob's raw/corrected states, and fidelity.
+def bell_measurement(out_ket, resource_type, psi_C, threshold=1e-6, verbose=True):
+    """Run Bell measurement, print results, and return per-outcome fidelities.
 
     Args:
         out_ket:       Shape-(3,3,3,3,2,2) numpy array — the 6-mode output ket
@@ -47,15 +47,21 @@ def bell_measurement(out_ket, resource_type, psi_C, threshold=1e-6):
         psi_C:         Shape-(2,2) ket of the intended state to teleport, used
                        to compute the post-correction fidelity F = |<psi|out>|^2.
         threshold:     Outcomes with probability below this are skipped.
+        verbose:       If False, suppress all printed output.
+
+    Returns:
+        dict mapping correctable outcome tuples (n0,n1,n2,n3) -> fidelity float.
     """
     outcome_corrections = corrections[resource_type]
 
-    print("=" * 60)
-    print(f"Outcomes |n_C_H, n_C_V, n_A_H, n_A_V>  (resource: {resource_type})")
-    print("Bob: raw state -> after Pauli correction")
-    print("=" * 60)
+    if verbose:
+        print("=" * 60)
+        print(f"Outcomes |n_C_H, n_C_V, n_A_H, n_A_V>  (resource: {resource_type})")
+        print("Bob: raw state -> after Pauli correction")
+        print("=" * 60)
 
     total_p = 0.0
+    fidelities = {}
     for n0, n1, n2, n3 in np.ndindex(3, 3, 3, 3):
         if n0 + n1 + n2 + n3 != 2:
             continue  # photon-number conservation: 2 photons land on the C/A side
@@ -66,9 +72,11 @@ def bell_measurement(out_ket, resource_type, psi_C, threshold=1e-6):
 
         total_p += prob
         cond_ket = sub / np.sqrt(prob)
-        raw_braket = state_to_braket(lab.State(ket=cond_ket), [2, 2], [[0, 1]])
-        outcome = f"|{n0},{n1},{n2},{n3}>"
-        print(f"  {outcome:<13} P={prob*100:6.2f}%   raw : {raw_braket}")
+
+        if verbose:
+            raw_braket = state_to_braket(lab.State(ket=cond_ket), [2, 2], [[0, 1]])
+            outcome = f"|{n0},{n1},{n2},{n3}>"
+            print(f"  {outcome:<13} P={prob*100:6.2f}%   raw : {raw_braket}")
 
         key = (n0, n1, n2, n3)
         if key in outcome_corrections:
@@ -76,12 +84,17 @@ def bell_measurement(out_ket, resource_type, psi_C, threshold=1e-6):
             corr_ket = cond_ket
             for op in ops:
                 corr_ket = _PAULI[op](corr_ket)
-            corr_braket = state_to_braket(lab.State(ket=corr_ket), [2, 2], [[0, 1]])
             fidelity = float(abs(np.sum(np.conj(psi_C) * corr_ket)) ** 2)
-            ops_str = " then ".join(ops)
-            print(f"  {'':<13}                apply {ops_str}: {corr_braket}   F={fidelity:.4f}")
-        else:
+            fidelities[key] = fidelity
+            if verbose:
+                corr_braket = state_to_braket(lab.State(ket=corr_ket), [2, 2], [[0, 1]])
+                ops_str = " then ".join(ops)
+                print(f"  {'':<13}                apply {ops_str}: {corr_braket}   F={fidelity:.4f}")
+        elif verbose:
             print(f"  {'':<13}                [Phi+/Phi- ambiguous -- no Pauli correction recovers |psi>]")
 
-    print()
-    print(f"Total probability over listed outcomes: {total_p*100:.2f}%")
+    if verbose:
+        print()
+        print(f"Total probability over listed outcomes: {total_p*100:.2f}%")
+
+    return fidelities

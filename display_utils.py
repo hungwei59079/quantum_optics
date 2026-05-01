@@ -1,24 +1,6 @@
 import numpy as np
 from mrmustard.lab import circuit_drawer
 
-
-def explain_circuit(circuit, mode_labels):
-    """Print the circuit diagram with a mode legend and per-gate annotation."""
-    print("=" * 60)
-    print("Mode legend:")
-    for i, label in enumerate(mode_labels):
-        print(f"  {i}: {label}")
-    print()
-    print("Operations (in order):")
-    for op in circuit.ops:
-        annotated = ", ".join(f"{m}={mode_labels[m]}" for m in op.modes)
-        print(f"  {op.short_name} on [{annotated}]")
-    print()
-    print("Diagram:")
-    print(circuit_drawer.circuit_text(circuit.ops))
-    print()
-
-
 def _format_coefficient(amp, decimals, threshold, is_first):
     """Format a complex amplitude into a sign + magnitude string."""
     real = round(float(np.real(amp)), decimals)
@@ -39,7 +21,6 @@ def _format_coefficient(amp, decimals, threshold, is_first):
         return f"{sign}{body}"
     connector = "-" if sign == "-" else "+"
     return f"{connector} {body}"
-
 
 def state_to_braket(state, cutoffs, mode_groups, polarization_labels=("H", "V"),
                     threshold=1e-4, decimals=4):
@@ -86,3 +67,32 @@ def state_to_braket(state, cutoffs, mode_groups, polarization_labels=("H", "V"),
         for i, (amp, ks) in enumerate(terms)
     ]
     return " ".join(parts)
+
+def explain_circuit(circuit, input_state, mode_labels, mode_groups=None):
+    """Print the circuit diagram with a mode legend and per-gate annotation."""
+    print("=" * 60)
+    print("Mode legend:")
+    for i, label in enumerate(mode_labels):
+        print(f"  {i}: {label}")
+    print()
+    print("Operations (in order):")
+    for op in circuit.ops:
+        annotated = ", ".join(f"{m}={mode_labels[m]}" for m in op.modes)
+        print(f"  {op.short_name} on [{annotated}]")
+    print()
+    print("Diagram:")
+    print(circuit_drawer.circuit_text(circuit.ops))
+    print()
+    # print(f"State to teleport: |psi>_C = {alpha.real:.4f} |H> + {beta.real:.4f} |V>")
+    print(f"State to teleport: {state_to_braket(input_state, [2, 2, 2, 2, 2, 2], mode_groups)}")
+    print()
+    input_braket = state_to_braket(input_state, [2, 2, 2, 2, 2, 2], mode_groups)
+    print("INPUT |psi>_C ⊗ |Bell>_AB (groups: C, A, B):")
+    print(f"  {input_braket}")
+    print()
+
+
+
+
+
+
