@@ -130,56 +130,54 @@ for tau in [0.0, T_CAR / 2, T_CAR, T_REP / 16, T_REP / 8, T_REP / 4, T_REP / 2, 
     print(f"{tau:+12.4f} {P:10.4f}")
 print()
 
-# --- mrmustard cross-check -------------------------------------------
-mm_N, mm_cutoff = 2, 3
-mm_taus = np.linspace(-0.6 * T_REP, 0.6 * T_REP, 7)
-print(f"== mrmustard cross-check (N = {mm_N} → {mm_N+1} modes/beam, Fock cutoff = {mm_cutoff}) ==")
-print(f"{'τ':>12} {'analytic':>12} {'mrmustard':>12} {'Δ':>12}")
-mm_P = np.empty_like(mm_taus)
-for i, tau in enumerate(mm_taus):
-    P_mm = coincidence_mrmustard(tau, mm_N, cutoff=mm_cutoff)
-    P_an = coincidence_analytic(tau, mm_N)
-    mm_P[i] = P_mm
-    print(f"{tau:+12.4f} {P_an:12.6f} {P_mm:12.6f} {P_mm-P_an:+12.2e}")
-print()
+# --- mrmustard cross-check at several N ------------------------------
+mm_cutoff = 3
+mm_N_values = [2, 4, 6]
+mm_taus = np.linspace(-0.6 * T_REP, 0.6 * T_REP, 31)
+mm_results = {}
+
+for mm_N in mm_N_values:
+    print(f"== mrmustard cross-check (N = {mm_N} → {mm_N+1} modes/beam, Fock cutoff = {mm_cutoff}) ==")
+    print(f"{'τ':>12} {'analytic':>12} {'mrmustard':>12} {'Δ':>12}")
+    P_arr = np.empty_like(mm_taus)
+    for i, tau in enumerate(mm_taus):
+        P_mm = coincidence_mrmustard(tau, mm_N, cutoff=mm_cutoff)
+        P_an = coincidence_analytic(tau, mm_N)
+        P_arr[i] = P_mm
+        print(f"{tau:+12.4f} {P_an:12.6f} {P_mm:12.6f} {P_mm-P_an:+12.2e}")
+    mm_results[mm_N] = P_arr
+    print()
 
 # --- plots ------------------------------------------------------------
-fig, axes = plt.subplots(1, 3, figsize=(15, 4.4))
+fig, axes = plt.subplots(1, 2, figsize=(15, 4.4))
 
-# (a) single-photon wavepacket profile (envelope = same Dirichlet kernel)
+
+# (b) HOM dip vs delay for several N, plus mrmustard markers (color-matched)
 ax = axes[0]
-t_grid = np.linspace(-0.5 * T_REP, 1.5 * T_REP, 4000)
-for N in [2, 6, 14]:
-    ax.plot(t_grid, pulse_envelope(t_grid, N), label=f"N = {N}  ({N+1} modes)")
-for k in range(2):
-    ax.axvline(k * T_REP, color="gray", linestyle=":", linewidth=0.7)
-ax.set_xlabel(r"time  $t$")
-ax.set_ylabel(r"$|\psi(t)|^2$ (peak-normalized)")
-ax.set_title("(a) single-photon wavepacket")
-ax.legend(fontsize=9)
-ax.grid(alpha=0.3)
-
-# (b) HOM dip vs delay for several N, plus mrmustard markers
-ax = axes[1]
 tau_grid = np.linspace(-0.6 * T_REP, 0.6 * T_REP, 4001)
-N_curves = [2, 4, 8, 14]
-for N, c in zip(N_curves, plt.cm.viridis(np.linspace(0.15, 0.85, len(N_curves)))):
+N_curves = [2, 4, 6, 14]
+N_to_color = dict(zip(N_curves, plt.cm.viridis(np.linspace(0.15, 0.85, len(N_curves)))))
+for N in N_curves:
     ax.plot(tau_grid, [coincidence_analytic(t, N) for t in tau_grid],
-            color=c, lw=1.4, label=f"N = {N}")
-ax.plot(mm_taus, mm_P, "kx", markersize=8, mew=2,
-        label=f"mrmustard (N = {mm_N}, cutoff = {mm_cutoff})")
+            color=N_to_color[N], lw=1.4, label=f"N = {N}")
+mm_markers = {2: "o", 4: "s", 6: "^"}
+for mm_N in mm_N_values:
+    ax.plot(mm_taus, mm_results[mm_N], mm_markers[mm_N],
+            color=N_to_color[mm_N], markersize=7,
+            markeredgecolor="black", markeredgewidth=0.8,
+            linestyle="none", label=f"mm N = {mm_N}")
 ax.axhline(0.5, color="gray", linestyle="--", linewidth=0.8)
 for k in [-1, 0, 1]:
     ax.axvline(k * T_REP, color="gray", linestyle=":", linewidth=0.7)
 ax.set_xlabel(r"delay  $\tau$")
 ax.set_ylabel(r"$P_\mathrm{coinc}$")
-ax.set_title("(b) HOM dip vs delay")
+ax.set_title(f"(a) HOM dip vs delay   (mrmustard cutoff = {mm_cutoff})")
 ax.set_ylim(-0.02, 0.6)
-ax.legend(fontsize=8, loc="lower right")
+ax.legend(fontsize=8, loc="lower right", ncol=2)
 ax.grid(alpha=0.3)
 
 # (c) rescaled overlay: dips collapse when we scale τ by (N+1)
-ax = axes[2]
+ax = axes[1]
 u_grid = np.linspace(-3.0, 3.0, 4001)
 for N, c in zip(N_curves, plt.cm.viridis(np.linspace(0.15, 0.85, len(N_curves)))):
     # rescale: u = (N+1) Δω τ / (2π)  →  τ = 2π u / ((N+1) Δω)
@@ -189,7 +187,7 @@ for N, c in zip(N_curves, plt.cm.viridis(np.linspace(0.15, 0.85, len(N_curves)))
 ax.axhline(0.5, color="gray", linestyle="--", linewidth=0.8)
 ax.set_xlabel(r"rescaled delay  $u = (N+1)\,\Delta\omega\,\tau / 2\pi$")
 ax.set_ylabel(r"$P_\mathrm{coinc}$")
-ax.set_title(r"(c) dips collapse onto a universal shape")
+ax.set_title(r"(b) dips collapse onto a universal shape")
 ax.set_ylim(-0.02, 0.6)
 ax.legend(fontsize=8, loc="lower right")
 ax.grid(alpha=0.3)
