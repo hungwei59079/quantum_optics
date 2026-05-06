@@ -57,6 +57,7 @@ from coincidence_utils import (
 )
 
 
+
 # ----------------------------------------------------------------------
 # Analytic detection-probability formulas
 # ----------------------------------------------------------------------
@@ -67,9 +68,14 @@ def hom_dip(tau, N):
 
 
 def detection_probs_analytic(tau, N):
-    """Return (P_coinc_same, P_coinc_diff, P_1arm_same, P_1arm_diff)."""
+    """Return dictionary of analytic detection probabilities."""
     H = hom_dip(tau, N)
-    return H / 2, 0.25, (1.0 - H) / 2, 0.25
+    return {
+        "coinc, same pol": H / 2,
+        "coinc, diff pol": 0.25,
+        "1-arm, same pol": (1.0 - H) / 2,
+        "1-arm, diff pol": 0.25,
+    }
 
 
 # ----------------------------------------------------------------------
@@ -155,12 +161,12 @@ def event_probabilities(probs, N):
     diff_b = bunch_b & ((n_bH == 1) & (n_bV == 1))
 
     # Use the Boolean masks to filter and sum the actual probability values
-    return (
-        float(probs_AB[same_coinc].sum()),
-        float(probs_AB[diff_coinc].sum()),
-        float(probs_AB[same_a | same_b].sum()),
-        float(probs_AB[diff_a | diff_b].sum()),
-    )
+    return {
+        "coinc, same pol": float(probs_AB[same_coinc].sum()),
+        "coinc, diff pol": float(probs_AB[diff_coinc].sum()),
+        "1-arm, same pol": float(probs_AB[same_a | same_b].sum()),
+        "1-arm, diff pol": float(probs_AB[diff_a | diff_b].sum()),
+    }
 
 
 # ----------------------------------------------------------------------
@@ -197,32 +203,23 @@ print(f"Mode spacing  Δω = {DELTA_OMEGA}   (T_rep = 2π/Δω = {T_REP:.4f})")
 print(f"Carrier       ω₀ = {OMEGA_0}    (T_car = 2π/ω₀ = {T_CAR:.4f}, ω₀/Δω = {OMEGA_0/DELTA_OMEGA:.0f})")
 print()
 
-CATEGORIES = ["coinc, same pol", "coinc, diff pol", "1-arm, same pol", "1-arm, diff pol"]
-
-# --- analytic snapshot at a representative N --------------------------
-demo_N = 4
-print(f"== Analytic detection probabilities (N = {demo_N} → {demo_N+1} modes/pol/qubit) ==")
-print(f"{'τ':>10}  " + "  ".join(f"{c:>16}" for c in CATEGORIES))
-for tau in [0.0, T_REP / 16, T_REP / 8, T_REP / 4, T_REP / 2, T_REP]:
-    p = detection_probs_analytic(tau, demo_N)
-    print(f"{tau:+10.4f}  " + "  ".join(f"{x:16.4f}" for x in p))
-print()
-
-# --- mrmustard cross-check at N = 2 -----------------------------------
+# Get categories dynamically from the dictionary keys
+# parameters
 alpha, beta = 1.0 / np.sqrt(2), 1.0 / np.sqrt(2)   # any (α, β) — formula is α,β-independent
 mm_N = 2
-mm_taus = np.array([0.0, T_REP / 8, T_REP / 4, T_REP / 2, T_REP])
-
+mm_taus = np.array([T_REP * k / 8 for k in range(-8, 9)]) 
+# --- mrmustard cross-check at N = 6 -----------------------------------
+categories = list(detection_probs_analytic(0, mm_N).keys())
 print(f"== mrmustard cross-check (N = {mm_N} → {mm_N+1} modes/pol/qubit, "
       f"|ψ⟩ = (|H⟩+|V⟩)/√2,  ca_cutoff = 3, b_cutoff = 2) ==")
-print(f"{'τ':>10}  " + "  ".join(f"{c:>20}" for c in CATEGORIES))
+print(f"{'τ':>10}  " + "  ".join(f"{c:>20}" for c in categories))
 mm_probs = np.empty((len(mm_taus), 4))
 for i, tau in enumerate(mm_taus):
     p_an = detection_probs_analytic(tau, mm_N)
     p_mm = detection_probs_mrmustard(alpha, beta, tau, mm_N)
-    mm_probs[i] = p_mm
+    mm_probs[i] = list(p_mm.values())
     print(f"{tau:+10.4f}  " + "  ".join(
-        f"{a:7.4f} / {m:7.4f}" for a, m in zip(p_an, p_mm)
+        f"{a:7.4f} / {m:7.4f}" for a, m in zip(p_an.values(), p_mm.values())
     ))
 print("(each cell:  analytic / mrmustard)")
 print()
@@ -233,10 +230,10 @@ fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
 # (a) all 4 detection probs vs τ for N = mm_N, with mrmustard markers
 ax = axes[0]
 tau_grid = np.linspace(-0.6 * T_REP, 0.6 * T_REP, 4001)
-ps_a = np.array([detection_probs_analytic(t, mm_N) for t in tau_grid]).T
+ps_a = np.array([list(detection_probs_analytic(t, mm_N).values()) for t in tau_grid]).T
 colors_cat  = ["tab:blue", "tab:cyan", "tab:red", "tab:orange"]
 markers_cat = ["o", "s", "^", "D"]
-for p, lbl, c in zip(ps_a, CATEGORIES, colors_cat):
+for p, lbl, c in zip(ps_a, categories, colors_cat):
     ax.plot(tau_grid, p, color=c, lw=1.4, label=lbl)
 for i, (mk, c) in enumerate(zip(markers_cat, colors_cat)):
     ax.plot(mm_taus, mm_probs[:, i], mk, color=c,
@@ -257,7 +254,7 @@ ax = axes[1]
 N_curves = [2, 4, 6, 14]
 N_to_color = dict(zip(N_curves, plt.cm.viridis(np.linspace(0.15, 0.85, len(N_curves)))))
 for N in N_curves:
-    p_same = np.array([detection_probs_analytic(t, N)[0] for t in tau_grid])
+    p_same = np.array([detection_probs_analytic(t, N)["coinc, same pol"] for t in tau_grid])
     ax.plot(tau_grid, p_same, color=N_to_color[N], lw=1.4, label=f"N = {N}")
 ax.plot(mm_taus, mm_probs[:, 0], "o", color=N_to_color[mm_N],
         markeredgecolor="black", markeredgewidth=0.8, markersize=7,
