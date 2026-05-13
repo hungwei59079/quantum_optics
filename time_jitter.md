@@ -130,11 +130,7 @@ Expand the BS product:
 
 $$
 \bigl(c^\dagger_{H,k_C} + d^\dagger_{H,k_C}\bigr)\bigl(c^\dagger_{H,k_A} - d^\dagger_{H,k_A}\bigr)
-\;=\;
-c^\dagger_{H,k_C} c^\dagger_{H,k_A}
-\;-\; c^\dagger_{H,k_C} d^\dagger_{H,k_A}
-\;+\; d^\dagger_{H,k_C} c^\dagger_{H,k_A}
-\;-\; d^\dagger_{H,k_C} d^\dagger_{H,k_A}.
+= c^\dagger_{H,k_C} c^\dagger_{H,k_A} - c^\dagger_{H,k_C} d^\dagger_{H,k_A} + d^\dagger_{H,k_C} c^\dagger_{H,k_A} - d^\dagger_{H,k_C} d^\dagger_{H,k_A}.
 $$
 
 Four output configurations: two coincidence terms ($c^\dagger d^\dagger$
@@ -149,8 +145,7 @@ operator pair
 $$
 (k_C = k_c,\,k_A = k_d)\,:\;\; -c^\dagger_{H,k_c} d^\dagger_{H,k_d},
 \qquad
-(k_C = k_d,\,k_A = k_c)\,:\;\; +d^\dagger_{H,k_d} c^\dagger_{H,k_c}
-= +c^\dagger_{H,k_c} d^\dagger_{H,k_d}
+(k_C = k_d,\,k_A = k_c)\,:\;\; +d^\dagger_{H,k_d} c^\dagger_{H,k_c} = +c^\dagger_{H,k_c} d^\dagger_{H,k_d}
 $$
 
 both contribute to the *same* output Fock state
@@ -160,9 +155,7 @@ and ports.) Collecting the two contributions and relabeling dummy
 indices in the second:
 
 $$
-\sum_{k_C, k_A} e^{i\phi_{k_C}}\bigl(-c^\dagger_{H,k_C} d^\dagger_{H,k_A} + c^\dagger_{H,k_A} d^\dagger_{H,k_C}\bigr)
-\;=\;
-\sum_{k_c, k_d}\,\bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr)\,c^\dagger_{H,k_c} d^\dagger_{H,k_d}.
+\sum_{k_C, k_A} e^{i\phi_{k_C}}\bigl(-c^\dagger_{H,k_C} d^\dagger_{H,k_A} + c^\dagger_{H,k_A} d^\dagger_{H,k_C}\bigr) = \sum_{k_c, k_d}\,\bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr)\,c^\dagger_{H,k_c} d^\dagger_{H,k_d}.
 $$
 
 This is exactly the multi-mode HOM-dip structure (compare lines 222–238
@@ -172,11 +165,7 @@ sum over $k_B$ kept explicit, the coincidence part of Term 1 in the
 post-BS state is
 
 $$
-|\Psi^{(1)}_{\text{coinc}}\rangle
-\;=\;
-\frac{\alpha}{2\sqrt{2}\,M^{3/2}}\sum_{k_c, k_d, k_B}
-\bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr)\,
-c^\dagger_{H,k_c} d^\dagger_{H,k_d}\,a^\dagger_{B,H,k_B}\,|0\rangle.
+|\Psi^{(1)}_{\text{coinc}}\rangle = \frac{\alpha}{2\sqrt{2}\,M^{3/2}}\sum_{k_c, k_d, k_B} \bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr)\, c^\dagger_{H,k_c} d^\dagger_{H,k_d}\,a^\dagger_{B,H,k_B}\,|0\rangle.
 $$
 
 The bunching part is the other two operator terms:
@@ -189,11 +178,7 @@ polarization, one arm.
 Identical to Term 1 with $H \to V$ and prefactor $-\beta/\sqrt{2}$:
 
 $$
-|\Psi^{(4)}_{\text{coinc}}\rangle
-\;=\;
--\frac{\beta}{2\sqrt{2}\,M^{3/2}}\sum_{k_c, k_d, k_B}
-\bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr)\,
-c^\dagger_{V,k_c} d^\dagger_{V,k_d}\,a^\dagger_{B,V,k_B}\,|0\rangle.
+|\Psi^{(4)}_{\text{coinc}}\rangle = -\frac{\beta}{2\sqrt{2}\,M^{3/2}}\sum_{k_c, k_d, k_B} \bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr)\, c^\dagger_{V,k_c} d^\dagger_{V,k_d}\,a^\dagger_{B,V,k_B}\,|0\rangle.
 $$
 
 The bunching part puts both V photons at the same port — same
@@ -220,11 +205,7 @@ Expand the BS product:
 
 $$
 \bigl(c^\dagger_{H,k_C} + d^\dagger_{H,k_C}\bigr)\bigl(c^\dagger_{V,k_A} - d^\dagger_{V,k_A}\bigr)
-=
-c^\dagger_{H,k_C} c^\dagger_{V,k_A}
-- c^\dagger_{H,k_C} d^\dagger_{V,k_A}
-+ d^\dagger_{H,k_C} c^\dagger_{V,k_A}
-- d^\dagger_{H,k_C} d^\dagger_{V,k_A}.
+= c^\dagger_{H,k_C} c^\dagger_{V,k_A} - c^\dagger_{H,k_C} d^\dagger_{V,k_A} + d^\dagger_{H,k_C} c^\dagger_{V,k_A} - d^\dagger_{H,k_C} d^\dagger_{V,k_A}.
 $$
 
 The four output configurations are now labeled by *polarization-port pairs*:
@@ -284,9 +265,7 @@ $|1_{H,k_c}\rangle_\alpha\,|1_{H,k_d}\rangle_\beta\,|1_{H,k_B}\rangle_B$
 is
 
 $$
-\text{amp}^{(1)}_{k_c, k_d, k_B}
-\;=\;
-\frac{\alpha}{2\sqrt{2}\,M^{3/2}}\,\bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr).
+\text{amp}^{(1)}_{k_c, k_d, k_B} = \frac{\alpha}{2\sqrt{2}\,M^{3/2}}\,\bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr).
 $$
 
 Squaring, using $|e^{ix} - e^{iy}|^2 = 2 - 2\cos(x - y)$, and noting
@@ -304,33 +283,19 @@ probability is the straight sum over $(k_c, k_d, k_B)$, each running
 over $M$ values:
 
 $$
-P^{(1)}_{\text{coinc, same}}
-\;=\;
-\sum_{k_c, k_d, k_B}\frac{|\alpha|^2}{8\,M^3}\,\bigl(2 - 2\cos((k_d - k_c)\Delta\omega\,\tau)\bigr)
-\;=\;
-\frac{|\alpha|^2}{4\,M^2}\,\Bigl(M^2 - \sum_{k_c, k_d}\cos((k_d - k_c)\Delta\omega\,\tau)\Bigr).
+P^{(1)}_{\text{coinc, same}} = \sum_{k_c, k_d, k_B}\frac{|\alpha|^2}{8\,M^3}\,\bigl(2 - 2\cos((k_d - k_c)\Delta\omega\,\tau)\bigr) = \frac{|\alpha|^2}{4\,M^2}\,\Bigl(M^2 - \sum_{k_c, k_d}\cos((k_d - k_c)\Delta\omega\,\tau)\Bigr).
 $$
 
 The double cosine sum collapses to a Dirichlet kernel squared:
 
 $$
-\sum_{k_c, k_d}\cos\bigl((k_d - k_c)\Delta\omega\,\tau\bigr)
-\;=\;
-\Re\Bigl[\Bigl(\sum_{k_d} e^{i k_d \Delta\omega\tau}\Bigr)\Bigl(\sum_{k_c} e^{-i k_c \Delta\omega\tau}\Bigr)\Bigr]
-\;=\;
-\Bigl|\sum_k e^{i k \Delta\omega\,\tau}\Bigr|^2
-\;=\;
-D_N(\Delta\omega\,\tau)^2.
+\sum_{k_c, k_d}\cos\bigl((k_d - k_c)\Delta\omega\,\tau\bigr) = \Re\Bigl[\Bigl(\sum_{k_d} e^{i k_d \Delta\omega\tau}\Bigr)\Bigl(\sum_{k_c} e^{-i k_c \Delta\omega\tau}\Bigr)\Bigr] = \Bigl|\sum_k e^{i k \Delta\omega\,\tau}\Bigr|^2 = D_N(\Delta\omega\,\tau)^2.
 $$
 
 So
 
 $$
-P^{(1)}_{\text{coinc, same}}
-\;=\;
-\frac{|\alpha|^2}{4}\,\Bigl(1 - \frac{D_N^2}{M^2}\Bigr)
-\;=\;
-\frac{|\alpha|^2}{2}\,\mathrm{HOM}(\tau).
+P^{(1)}_{\text{coinc, same}} = \frac{|\alpha|^2}{4}\,\Bigl(1 - \frac{D_N^2}{M^2}\Bigr) = \frac{|\alpha|^2}{2}\,\mathrm{HOM}(\tau).
 $$
 
 By the H↔V symmetry between Terms 1 and 4, $P^{(4)}_{\text{coinc, same}} = |\beta|^2\,\mathrm{HOM}(\tau)/2$.
@@ -338,11 +303,7 @@ The Fock supports of Terms 1 and 4 are orthogonal (H photons vs V
 photons at $\alpha\beta$), so total adds:
 
 $$
-P_{\text{coinc, same}}(\tau)
-\;=\;
-\frac{(|\alpha|^2 + |\beta|^2)\,\mathrm{HOM}(\tau)}{2}
-\;=\;
-\frac{\mathrm{HOM}(\tau)}{2}.
+P_{\text{coinc, same}}(\tau) = \frac{(|\alpha|^2 + |\beta|^2)\,\mathrm{HOM}(\tau)}{2} = \frac{\mathrm{HOM}(\tau)}{2}.
 $$
 
 The $|\alpha|^2 + |\beta|^2 = 1$ collapse is what makes the answer
@@ -357,13 +318,9 @@ configurations contribute amplitudes (each with a per-Fock-state global
 delay phase that vanishes in the squared modulus)
 
 $$
-\text{amp}^{(2)}_{\text{H@}\alpha,\text{V@}\beta}
-\;=\;
--\,\frac{\alpha\,e^{i\phi_{k_C}}}{2\sqrt{2}\,M^{3/2}},
+\text{amp}^{(2)}_{\text{H@}\alpha,\text{V@}\beta} = -\,\frac{\alpha\,e^{i\phi_{k_C}}}{2\sqrt{2}\,M^{3/2}},
 \qquad
-\text{amp}^{(2)}_{\text{H@}\beta,\text{V@}\alpha}
-\;=\;
-+\,\frac{\alpha\,e^{i\phi_{k_C}}}{2\sqrt{2}\,M^{3/2}},
+\text{amp}^{(2)}_{\text{H@}\beta,\text{V@}\alpha} = +\,\frac{\alpha\,e^{i\phi_{k_C}}}{2\sqrt{2}\,M^{3/2}},
 $$
 
 each multiplied by Bob's $a^\dagger_{B,V,k_B}\,|0\rangle$. Each triple
@@ -513,11 +470,7 @@ photon in orthogonal polarization wavepackets. The unnormalized Bob ket
 is
 
 $$
-|B\rangle^{(k_\alpha, l_\beta)}_\text{unnorm}
-= \frac{1}{2\sqrt{2}\,M}\Bigl[
-  \alpha\, e^{i\omega_{k_\alpha}\tau}\, |V\rangle_B
-+ \beta\,  e^{i\omega_{l_\beta}\tau}\, |H\rangle_B
-\Bigr].
+|B\rangle^{(k_\alpha, l_\beta)}_\text{unnorm} = \frac{1}{2\sqrt{2}\,M}\Bigl[ \alpha\, e^{i\omega_{k_\alpha}\tau}\, |V\rangle_B + \beta\,  e^{i\omega_{l_\beta}\tau}\, |H\rangle_B \Bigr].
 $$
 
 Note the polarization "swap": $\alpha$ multiplies $|V\rangle_B$ and
@@ -533,11 +486,7 @@ $|\psi_\text{eff}\rangle = X|\psi\rangle = \beta|H\rangle_B + \alpha|V\rangle_B$
 and take the inner product:
 
 $$
-\langle\psi_\text{eff}\,|\,B\rangle^{(k_\alpha, l_\beta)}_\text{unnorm}
-= \frac{1}{2\sqrt{2}\,M}\Bigl[
-  |\alpha|^2\, e^{i\omega_{k_\alpha}\tau}
-+ |\beta|^2\, e^{i\omega_{l_\beta}\tau}
-\Bigr].
+\langle\psi_\text{eff}\,|\,B\rangle^{(k_\alpha, l_\beta)}_\text{unnorm} = \frac{1}{2\sqrt{2}\,M}\Bigl[ |\alpha|^2\, e^{i\omega_{k_\alpha}\tau} + |\beta|^2\, e^{i\omega_{l_\beta}\tau} \Bigr].
 $$
 
 The cross-terms $\alpha^*\beta\,\langle V|H\rangle$ and $\beta^*\alpha\,\langle H|V\rangle$
@@ -549,10 +498,7 @@ is why the formula depends on $|\alpha|^2|\beta|^2$ alone.
 squared expands to
 
 $$
-\bigl|\langle\psi_\text{eff}\,|\,B\rangle^{(k_\alpha, l_\beta)}_\text{unnorm}\bigr|^2
-= \frac{1}{8M^2}\Bigl[
-|\alpha|^4 + |\beta|^4 + 2\,|\alpha|^2|\beta|^2\,\cos\bigl((k_\alpha - l_\beta)\Delta\omega\,\tau\bigr)
-\Bigr],
+\bigl|\langle\psi_\text{eff}\,|\,B\rangle^{(k_\alpha, l_\beta)}_\text{unnorm}\bigr|^2 = \frac{1}{8M^2}\Bigl[ |\alpha|^4 + |\beta|^4 + 2\,|\alpha|^2|\beta|^2\,\cos\bigl((k_\alpha - l_\beta)\Delta\omega\,\tau\bigr) \Bigr],
 $$
 
 with the carrier $\omega_0$ canceling out of the cosine (only the
@@ -560,16 +506,13 @@ with the carrier $\omega_0$ canceling out of the cosine (only the
 Summing over the $M^2$ frequency pairs gives
 
 $$
-\sum_{k_\alpha, l_\beta} \cos\bigl((k_\alpha - l_\beta)\Delta\omega\,\tau\bigr)
-= \Bigl|\sum_k e^{ik\Delta\omega\,\tau}\Bigr|^2
-= D_N(\Delta\omega\,\tau)^2,
+\sum_{k_\alpha, l_\beta} \cos\bigl((k_\alpha - l_\beta)\Delta\omega\,\tau\bigr) = \Bigl|\sum_k e^{ik\Delta\omega\,\tau}\Bigr|^2 = D_N(\Delta\omega\,\tau)^2,
 $$
 
 so
 
 $$
-\sum_{k_\alpha, l_\beta} |\langle\psi_\text{eff}\,|\,B\rangle_\text{unnorm}|^2
-= \frac{|\alpha|^4 + |\beta|^4}{8} + \frac{|\alpha|^2|\beta|^2 \, D_N^2}{4M^2}.
+\sum_{k_\alpha, l_\beta} |\langle\psi_\text{eff}\,|\,B\rangle_\text{unnorm}|^2 = \frac{|\alpha|^4 + |\beta|^4}{8} + \frac{|\alpha|^2|\beta|^2 \, D_N^2}{4M^2}.
 $$
 
 **The other three macros give the same.** By the H↔V swap symmetry,
@@ -585,8 +528,7 @@ compositions $ZX$ vs $XZ$ differ only by a global sign.)
 So each macro contributes an equal share to numerator and denominator:
 
 $$
-\text{numerator} = 4 \cdot \Bigl[\frac{|\alpha|^4 + |\beta|^4}{8} + \frac{|\alpha|^2|\beta|^2 \, D_N^2}{4M^2}\Bigr]
-= \frac{|\alpha|^4 + |\beta|^4}{2} + \frac{|\alpha|^2|\beta|^2 \, D_N^2}{M^2},
+\text{numerator} = 4 \cdot \Bigl[\frac{|\alpha|^4 + |\beta|^4}{8} + \frac{|\alpha|^2|\beta|^2 \, D_N^2}{4M^2}\Bigr] = \frac{|\alpha|^4 + |\beta|^4}{2} + \frac{|\alpha|^2|\beta|^2 \, D_N^2}{M^2},
 $$
 
 $$
