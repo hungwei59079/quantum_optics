@@ -55,6 +55,9 @@ phi_deg = np.degrees(phi_errors)
 alpha_sq_values = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55, 0.65, 0.75, 0.85, 0.95]
 colors = plt.cm.plasma(np.linspace(0.05, 0.95, len(alpha_sq_values)))
 
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ['Times New Roman']
+
 fig, ax = plt.subplots(figsize=(8, 5))
 
 for color, alpha_sq in zip(colors, alpha_sq_values):
@@ -89,14 +92,15 @@ for color, alpha_sq in zip(colors, alpha_sq_values):
     label = rf"α=$\sqrt{{{alpha_sq:.4g}}}$, β=$\sqrt{{{beta_sq:.4g}}}$"
     ax.plot(phi_deg, mean_fidelity, color=color, linewidth=1.5, marker="o", markersize=3, label=label)
 
-ax.set_xlabel("Phase error φ (degrees)")
-ax.set_ylabel("Fidelity F")
-ax.set_title("Teleportation fidelity vs. phase error (resource: Φ⁻)")
+    ax.set_xlabel("Phase error φ (degrees)", fontsize=20, fontweight='bold')
+ax.set_ylabel("Fidelity F", fontsize=20, fontweight='bold')
+ax.set_title(r"Teleportation fidelity vs. phase error (resource: $\Phi^-$)", fontsize=22, fontweight='bold', pad=20)
 ax.set_ylim(-0.05, 1.05)
+ax.set_xticks(np.arange(-180, 181, 60))
+ax.tick_params(axis='both', which='major', labelsize=18)
 ax.axhline(1.0, color="gray", linestyle="--", linewidth=0.8)
 ax.grid(True, alpha=0.3)
 ax.legend(fontsize=7, ncol=2, loc="lower center")
-plt.tight_layout()
-plt.savefig("fidelity_vs_phase_error.png", dpi=150)
-plt.show()
-print("Plot saved to fidelity_vs_phase_error.png")
+plt.tight_layout(rect=[0.05, 0.05, 0.95, 0.95], pad=2.0)
+plt.savefig("results/fidelity_vs_phase_error.png", dpi=150)
+print("Plot saved to results/fidelity_vs_phase_error.png")

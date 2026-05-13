@@ -202,7 +202,7 @@ print()
 # parameters
 alpha, beta = 1.0 / np.sqrt(2), 1.0 / np.sqrt(2)   # any (α, β) — formula is α,β-independent
 mm_M = 3
-mm_taus = np.array([T_REP * k / 8 for k in range(-8, 9)])
+mm_taus = np.array([T_REP * k / 16 for k in range(-8, 9)])
 
 # --- mrmustard cross-check ---------------------------------------------
 categories = list(detection_probs_analytic(0, mm_M).keys())
@@ -221,7 +221,10 @@ print("(each cell:  analytic / mrmustard)")
 print()
 
 # --- plots -----------------------------------------------------------
-fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ['Times New Roman']
+
+fig, axes = plt.subplots(1, 2, figsize=(13, 6.0))
 
 # (a) all 4 detection probs vs τ for M = mm_M, with mrmustard markers
 ax = axes[0]
@@ -238,11 +241,14 @@ for i, (mk, c) in enumerate(zip(markers_cat, colors_cat)):
 ax.axhline(0.25, color="gray", linestyle="--", linewidth=0.7)
 for k in [-1, 0, 1]:
     ax.axvline(k * T_REP, color="gray", linestyle=":", linewidth=0.7)
-ax.set_xlabel(r"delay  $\tau$")
-ax.set_ylabel("probability")
-ax.set_title(f"(a) detection events vs delay  (M = {mm_M};  markers = mrmustard)")
+ax.set_xlim(-4.0, 4.0)
+ax.set_xlabel(r"delay  $\tau$", fontsize=24, fontweight='bold')
+ax.set_ylabel("probability", fontsize=24, fontweight='bold')
+ax.set_title(f"(a) detection events vs delay\n(M = {mm_M};  markers = mrmustard)", fontsize=20, fontweight='bold', pad=12)
 ax.set_ylim(-0.02, 0.55)
-ax.legend(fontsize=8, loc="center right")
+ax.set_yticks(np.arange(0.0, 0.6, 0.1))
+ax.tick_params(axis='both', which='major', labelsize=22)
+ax.legend(fontsize=14, loc="upper right")
 ax.grid(alpha=0.3)
 
 # (b) P(both arms, same pol) vs τ for several M — the τ-dependent signal
@@ -256,19 +262,21 @@ ax.plot(mm_taus, mm_probs[:, 0], "o", color=M_to_color[mm_M],
         markeredgecolor="black", markeredgewidth=0.8, markersize=7,
         linestyle="none", label=f"mm  M = {mm_M}")
 ax.axhline(0.25, color="gray", linestyle="--", linewidth=0.7,
-           label=r"asymptote $1/4$")
+           label=r"asymptote 1/4")
 for k in [-1, 0, 1]:
     ax.axvline(k * T_REP, color="gray", linestyle=":", linewidth=0.7)
-ax.set_xlabel(r"delay  $\tau$")
-ax.set_ylabel(r"$P(\mathrm{both\ arms,\ same\ pol})$")
-ax.set_title("(b) τ-dependent same-pol coincidence")
+ax.set_xlim(-4.0, 4.0)
+ax.set_xlabel(r"delay  $\tau$", fontsize=24, fontweight='bold')
+ax.set_ylabel(r"$P(\mathrm{both\ arms,\ same\ pol})$", fontsize=18, fontweight='bold')
+ax.set_title("(b) τ-dependent same-pol coincidence", fontsize=24, fontweight='bold', pad=12)
 ax.set_ylim(-0.01, 0.30)
-ax.legend(fontsize=8, loc="lower right")
+ax.set_yticks(np.arange(0.0, 0.35, 0.1))
+ax.tick_params(axis='both', which='major', labelsize=22)
+ax.legend(fontsize=14, loc="lower right")
 ax.grid(alpha=0.3)
 
 plt.suptitle(rf"Bell-measurement with input-qubit timing jitter  "
-             rf"($\omega_0/\Delta\omega = {OMEGA_0/DELTA_OMEGA:.0f}$)")
-plt.tight_layout(rect=[0, 0, 1, 0.95])
-plt.savefig("teleportation_time_jitter.png", dpi=150)
-plt.show()
-print("Plot saved to teleportation_time_jitter.png")
+             rf"($\omega_0/\Delta\omega = {OMEGA_0/DELTA_OMEGA:.0f}$)", fontsize=26, fontweight='bold')
+plt.tight_layout(rect=[0, 0, 1, 0.92], pad=1.0)
+plt.savefig("results/teleportation_time_jitter.png", dpi=150)
+print("Plot saved to results/teleportation_time_jitter.png")

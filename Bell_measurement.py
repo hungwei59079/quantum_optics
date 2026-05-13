@@ -47,13 +47,7 @@ circuit = lab.Circuit(
 mode_labels = ["A_H", "A_V", "B_H", "B_V"]
 mode_groups = [[0, 1], [2, 3]]  # arm A: modes 0,1 (H,V); arm B: modes 2,3 (H,V)
 
-print("=" * 60)
-print("BELL STATE MEASUREMENT APPARATUS")
-print("=" * 60)
-explain_circuit(circuit, mode_labels)
-print()
-print("Detectors: PNR on each mode")
-print()
+
 
 # --- Input state: |Psi+> = (|HV> + |VH>) / sqrt(2) ---------------
 # In the 4-mode encoding (A_H, A_V, B_H, B_V):
@@ -61,8 +55,16 @@ print()
 #   |V>_A |H>_B = |0,1,1,0>
 ket = np.zeros((2, 2, 2, 2), dtype=complex)
 ket[1, 0, 1, 0] = 1 / np.sqrt(2)
-ket[0, 1, 0, 1] = - 1 / np.sqrt(2)
+ket[0, 1, 0, 1] = 1 / np.sqrt(2)
 psi_plus = lab.State(ket=ket)
+
+print("=" * 60)
+print("BELL STATE MEASUREMENT APPARATUS")
+print("=" * 60)
+explain_circuit(circuit, psi_plus, mode_labels)
+print()
+print("Detectors: PNR on each mode")
+print()
 
 # --- Apply the circuit and read joint photon-number probabilities --
 output_state = psi_plus >> circuit

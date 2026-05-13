@@ -58,7 +58,7 @@ from coincidence_utils import (
 # parameters
 alpha, beta = 1.0 / np.sqrt(2), 1.0 / np.sqrt(2)   # state to teleport
 mm_M = 3
-mm_taus = np.array([0.0, T_REP / 8, T_REP / 4, T_REP / 2, T_REP])
+mm_taus = np.array([T_REP * k / 16 for k in range(-8, 9)])
 
 
 # ----------------------------------------------------------------------
@@ -309,7 +309,10 @@ for i, tau in enumerate(mm_taus):
 print()
 
 # --- plots -----------------------------------------------------------
-fig, axes = plt.subplots(1, 2, figsize=(13, 4.6))
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ['Times New Roman']
+
+fig, axes = plt.subplots(1, 2, figsize=(13, 6.0))
 
 # (a) F vs τ for several M at fixed |ψ⟩ = (|H⟩+|V⟩)/√2 (worst case)
 ax = axes[0]
@@ -327,40 +330,42 @@ ax.axhline(0.5, color="gray", linestyle="--", linewidth=0.7)
 ax.axhline(1.0, color="gray", linestyle=":", linewidth=0.7)
 for k in [-1, 0, 1]:
     ax.axvline(k * T_REP, color="gray", linestyle=":", linewidth=0.7)
-ax.set_xlabel(r"delay  $\tau$")
-ax.set_ylabel(r"fidelity  $F(\tau)$")
-ax.set_title(r"(a) F vs $\tau$ for $|\psi\rangle = (|H\rangle + |V\rangle)/\sqrt{2}$")
+ax.set_xlim(-4.0, 4.0)
+ax.set_xlabel(r"delay  $\tau$", fontsize=24, fontweight='bold')
+ax.set_ylabel(r"fidelity  $F(\tau)$", fontsize=24, fontweight='bold')
+ax.set_title(r"(a) F vs $\tau$ for $|\psi\rangle = (|H\rangle + |V\rangle)/\sqrt{2}$", fontsize=24, fontweight='bold', pad=12)
 ax.set_ylim(0.45, 1.03)
-ax.legend(fontsize=8, loc="lower right")
+ax.tick_params(axis='both', which='major', labelsize=22)
+ax.legend(fontsize=14, loc="upper right")
 ax.grid(alpha=0.3)
 
 # (b) F vs τ for several |ψ⟩ at fixed M
 ax = axes[1]
 M_b = 5
 states_plot = [
-    ("|H⟩",                 (1.0, 0.0),                       "tab:blue"),
-    ("0.6|H⟩+0.8|V⟩",       (0.6, 0.8),                       "tab:green"),
-    ("(|H⟩+|V⟩)/√2",       (1 / np.sqrt(2),  1 / np.sqrt(2)), "tab:red"),
-    ("(|H⟩+i|V⟩)/√2",      (1 / np.sqrt(2), 1j / np.sqrt(2)), "tab:orange"),
+    (r"$|H\rangle$",                 (1.0, 0.0),                       "tab:blue"),
+    (r"$0.6|H\rangle+0.8|V\rangle$",       (0.6, 0.8),                       "tab:green"),
+    (r"$(|H\rangle+|V\rangle)/\sqrt{2}$",       (1 / np.sqrt(2),  1 / np.sqrt(2)), "tab:red"),
+    (r"$(|H\rangle+i|V\rangle)/\sqrt{2}$",      (1 / np.sqrt(2), 1j / np.sqrt(2)), "tab:orange"),
 ]
 for name, (a, b), c in states_plot:
     F = np.array([fidelity_analytic(a, b, t, M_b) for t in tau_grid])
-    coef = 4 * abs(a) ** 2 * abs(b) ** 2
     ax.plot(tau_grid, F, color=c, lw=1.4,
-            label=rf"$|\psi\rangle =$ {name}  ($4|\alpha|^2|\beta|^2 = {coef:.2f}$)")
+            label=f"$|\psi\\rangle = $ {name}")
 ax.axhline(0.5, color="gray", linestyle="--", linewidth=0.7)
 ax.axhline(1.0, color="gray", linestyle=":", linewidth=0.7)
 for k in [-1, 0, 1]:
     ax.axvline(k * T_REP, color="gray", linestyle=":", linewidth=0.7)
-ax.set_xlabel(r"delay  $\tau$")
-ax.set_ylabel(r"$F(\tau)$")
-ax.set_title(rf"(b) F vs $\tau$ for several $|\psi\rangle$  (M = {M_b})")
+ax.set_xlim(-4.0, 4.0)
+ax.set_xlabel(r"delay  $\tau$", fontsize=24, fontweight='bold')
+ax.set_ylabel(r"$F(\tau)$", fontsize=24, fontweight='bold')
+ax.set_title(rf"(b) F vs $\tau$ for several $|\psi\rangle$  (M = {M_b})", fontsize=24, fontweight='bold', pad=12)
 ax.set_ylim(0.45, 1.03)
-ax.legend(fontsize=8, loc="lower right")
+ax.tick_params(axis='both', which='major', labelsize=22)
+ax.legend(fontsize=14, loc="upper right")
 ax.grid(alpha=0.3)
 
-plt.suptitle(r"Post-selected teleportation fidelity vs input-qubit timing jitter")
-plt.tight_layout(rect=[0, 0, 1, 0.95])
-plt.savefig("teleportation_time_jitter_fidelity.png", dpi=150)
-plt.show()
-print("Plot saved to teleportation_time_jitter_fidelity.png")
+plt.suptitle(r"Post-selected teleportation fidelity vs input-qubit timing jitter", fontsize=26, fontweight='bold')
+plt.tight_layout(rect=[0, 0, 1, 0.92], pad=1.0)
+plt.savefig("results/teleportation_time_jitter_fidelity.png", dpi=150)
+print("Plot saved to results/teleportation_time_jitter_fidelity.png")
