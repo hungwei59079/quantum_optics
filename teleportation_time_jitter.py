@@ -1,7 +1,7 @@
 """
 Bell-measurement detection statistics with timing jitter on the input qubit.
 
-Mode layout (M = N+1 frequency modes per polarization):
+Mode layout (M frequency modes per polarization, M odd):
     C: input qubit          modes [0..2M-1]   (H: 0..M-1,    V: M..2M-1)
     A: Alice (Bell pair)     modes [2M..4M-1]  (H: 2M..3M-1,  V: 3M..4M-1)
     B: Bob   (Bell pair)     modes [4M..6M-1]  (H: 4M..5M-1,  V: 5M..6M-1)
@@ -12,7 +12,7 @@ exp(i ω_k τ) on every C mode (both polarizations together — the qubit is
 delayed as one).
 
 Input state — each |P⟩_X is a single photon in equal superposition across
-N+1 frequency modes (mode-locked picture, c_k = 1/√(N+1)):
+M frequency modes (mode-locked picture, c_k = 1/√M):
 
     |ψ⟩_C   = α|H⟩_C + β|V⟩_C
     |Φ⁻⟩_AB = (|HH⟩_AB - |VV⟩_AB) / √2
@@ -24,22 +24,23 @@ polarization composition), so they don't interfere.  Working out each
 term gives clean closed-form detection probabilities, INDEPENDENT of
 α, β:
 
-    P(both arms, same pol)  = HOM(τ) / 2 = (1/4)[1 − D_N(Δω τ)²/(N+1)²]
+    P(both arms, same pol)  = HOM(τ) / 2 = (1/4)[1 − D_M(Δω τ)²/M²]
     P(both arms, diff pol)  = 1/4                                     (constant)
     P(one  arm, same pol)   = (1 − HOM(τ)) / 2
     P(one  arm, diff pol)   = 1/4                                     (constant)
 
-where  HOM(τ) = (1/2)[1 − D_N(Δω τ)²/(N+1)²]  is the standard HOM dip.
+where  HOM(τ) = (1/2)[1 − D_M(Δω τ)²/M²]  is the standard HOM dip, with
+the M-term Dirichlet kernel  D_M(x) = sin(M x/2) / sin(x/2).
 The τ-dependence lives entirely in the *same-polarization* channels —
 exactly the channels the BS Bell-measurement uses to distinguish Bell
 states, so this is where timing jitter erodes the teleportation.
 
-We cross-check at N = 2 with an explicit mrmustard simulation: build the
-full 6(N+1)-mode input ket with mixed cutoffs (3 for C/A modes that can
+We cross-check at M = 3 with an explicit mrmustard simulation: build the
+full 6M-mode input ket with mixed cutoffs (3 for C/A modes that can
 bunch post-BS, 2 for the untouched B modes), propagate through the BS
 circuit, and aggregate joint Fock probabilities by photon counts at each
-polarization-port.  Larger N is infeasible (3^20·2^10 ≈ 3.5 T elements
-at N = 4) but the analytic formula covers the full sweep.
+polarization-port.  Larger M is infeasible (3^20·2^10 ≈ 3.5 T elements
+at M = 5) but the analytic formula covers the full sweep.
 """
 
 import numpy as np
@@ -57,19 +58,18 @@ from coincidence_utils import (
 )
 
 
-
 # ----------------------------------------------------------------------
 # Analytic detection-probability formulas
 # ----------------------------------------------------------------------
-def hom_dip(tau, N):
-    """Standard HOM dip:  (1/2)[1 − D_N(Δω τ)²/(N+1)²]."""
-    D = dirichlet_kernel(DELTA_OMEGA * tau, N)
-    return 0.5 * (1.0 - (D / (N + 1)) ** 2)
+def hom_dip(tau, M):
+    """Standard HOM dip:  (1/2)[1 − D_M(Δω τ)²/M²]  with  D_M(x) = sin(M x/2)/sin(x/2)."""
+    D = dirichlet_kernel(DELTA_OMEGA * tau, M)
+    return 0.5 * (1.0 - (D / M) ** 2)
 
 
-def detection_probs_analytic(tau, N):
+def detection_probs_analytic(tau, M):
     """Return dictionary of analytic detection probabilities."""
-    H = hom_dip(tau, N)
+    H = hom_dip(tau, M)
     return {
         "coinc, same pol": H / 2,
         "coinc, diff pol": 0.25,
@@ -91,7 +91,7 @@ def _mode_idx(qubit, polarization, freq, M):
 # ----------------------------------------------------------------------
 # Input ket builder
 # ----------------------------------------------------------------------
-def build_input_ket(alpha, beta, N, ca_cutoff=3, b_cutoff=2):
+def build_input_ket(alpha, beta, M, ca_cutoff=3, b_cutoff=2):
     """
     Build  |Ψ⟩_in = (α|H⟩_C + β|V⟩_C) ⊗ (|HH⟩_AB − |VV⟩_AB) / √2.
 
@@ -99,7 +99,6 @@ def build_input_ket(alpha, beta, N, ca_cutoff=3, b_cutoff=2):
     into one mode); B modes at b_cutoff (≥ 2 — never modified).  Returns a
     numpy array of shape (ca_cutoff,)*(4M) + (b_cutoff,)*(2M).
     """
-    M = N + 1
     n_modes = 6 * M
     shape = (ca_cutoff,) * (4 * M) + (b_cutoff,) * (2 * M)
     ket = np.zeros(shape, dtype=complex)
@@ -125,10 +124,8 @@ def build_input_ket(alpha, beta, N, ca_cutoff=3, b_cutoff=2):
 # ----------------------------------------------------------------------
 # Joint Fock probabilities → 4 detection-event probabilities
 # ----------------------------------------------------------------------
-def event_probabilities(probs, N):
+def event_probabilities(probs, M):
     """Aggregate the joint Fock-probability tensor into the 4 categories."""
-    M = N + 1
-
     # Marginalize over B modes (the last 2M axes)
     probs_AB = probs
     for _ in range(2 * M):
@@ -137,13 +134,13 @@ def event_probabilities(probs, N):
     # idx_arr is a tensor of shape (4M, ca_cutoff, ca_cutoff, ..., ca_cutoff)
     # Mathematically, idx_arr[i, a_0, a_1, ..., a_{4M-1}] = a_i (the photon number in mode i).
     idx_arr = np.indices(probs_AB.shape)
-    
+
     # Each of below sums is a tensor of the same shape as probs_AB, (3, 3, 3,...).
     n_aH = idx_arr[0:M].sum(axis=0) # e.g., n_aH[a_0, a_1, ..., a_{4M-1}] = a_0 + a_1 + ... + a_{M-1} (total photons in A_H modes)
     n_aV = idx_arr[M:2*M].sum(axis=0)
     n_bH = idx_arr[2*M:3*M].sum(axis=0)
     n_bV = idx_arr[3*M:4*M].sum(axis=0)
-    
+
     # Total photons in output ports A and B
     n_a = n_aH + n_aV
     n_b = n_bH + n_bV
@@ -172,11 +169,10 @@ def event_probabilities(probs, N):
 # ----------------------------------------------------------------------
 # mrmustard simulation
 # ----------------------------------------------------------------------
-def detection_probs_mrmustard(alpha, beta, tau, N, ca_cutoff=3, b_cutoff=2):
-    M = N + 1
-    omegas = mode_frequencies(N)
+def detection_probs_mrmustard(alpha, beta, tau, M, ca_cutoff=3, b_cutoff=2):
+    omegas = mode_frequencies(M)
 
-    state = lab.State(ket=build_input_ket(alpha, beta, N, ca_cutoff, b_cutoff))
+    state = lab.State(ket=build_input_ket(alpha, beta, M, ca_cutoff, b_cutoff))
 
     ops = []
     for P in ["H", "V"]:
@@ -193,7 +189,7 @@ def detection_probs_mrmustard(alpha, beta, tau, N, ca_cutoff=3, b_cutoff=2):
     cutoffs = [ca_cutoff] * (4 * M) + [b_cutoff] * (2 * M)
     probs = np.asarray(out.fock_probabilities(cutoffs=cutoffs))
 
-    return event_probabilities(probs, N)
+    return event_probabilities(probs, M)
 
 
 # ======================================================================
@@ -203,20 +199,20 @@ print(f"Mode spacing  Δω = {DELTA_OMEGA}   (T_rep = 2π/Δω = {T_REP:.4f})")
 print(f"Carrier       ω₀ = {OMEGA_0}    (T_car = 2π/ω₀ = {T_CAR:.4f}, ω₀/Δω = {OMEGA_0/DELTA_OMEGA:.0f})")
 print()
 
-# Get categories dynamically from the dictionary keys
 # parameters
 alpha, beta = 1.0 / np.sqrt(2), 1.0 / np.sqrt(2)   # any (α, β) — formula is α,β-independent
-mm_N = 2
-mm_taus = np.array([T_REP * k / 8 for k in range(-8, 9)]) 
-# --- mrmustard cross-check at N = 6 -----------------------------------
-categories = list(detection_probs_analytic(0, mm_N).keys())
-print(f"== mrmustard cross-check (N = {mm_N} → {mm_N+1} modes/pol/qubit, "
+mm_M = 3
+mm_taus = np.array([T_REP * k / 8 for k in range(-8, 9)])
+
+# --- mrmustard cross-check ---------------------------------------------
+categories = list(detection_probs_analytic(0, mm_M).keys())
+print(f"== mrmustard cross-check (M = {mm_M} modes/pol/qubit, "
       f"|ψ⟩ = (|H⟩+|V⟩)/√2,  ca_cutoff = 3, b_cutoff = 2) ==")
 print(f"{'τ':>10}  " + "  ".join(f"{c:>20}" for c in categories))
 mm_probs = np.empty((len(mm_taus), 4))
 for i, tau in enumerate(mm_taus):
-    p_an = detection_probs_analytic(tau, mm_N)
-    p_mm = detection_probs_mrmustard(alpha, beta, tau, mm_N)
+    p_an = detection_probs_analytic(tau, mm_M)
+    p_mm = detection_probs_mrmustard(alpha, beta, tau, mm_M)
     mm_probs[i] = list(p_mm.values())
     print(f"{tau:+10.4f}  " + "  ".join(
         f"{a:7.4f} / {m:7.4f}" for a, m in zip(p_an.values(), p_mm.values())
@@ -227,10 +223,10 @@ print()
 # --- plots -----------------------------------------------------------
 fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
 
-# (a) all 4 detection probs vs τ for N = mm_N, with mrmustard markers
+# (a) all 4 detection probs vs τ for M = mm_M, with mrmustard markers
 ax = axes[0]
 tau_grid = np.linspace(-0.6 * T_REP, 0.6 * T_REP, 4001)
-ps_a = np.array([list(detection_probs_analytic(t, mm_N).values()) for t in tau_grid]).T
+ps_a = np.array([list(detection_probs_analytic(t, mm_M).values()) for t in tau_grid]).T
 colors_cat  = ["tab:blue", "tab:cyan", "tab:red", "tab:orange"]
 markers_cat = ["o", "s", "^", "D"]
 for p, lbl, c in zip(ps_a, categories, colors_cat):
@@ -244,21 +240,21 @@ for k in [-1, 0, 1]:
     ax.axvline(k * T_REP, color="gray", linestyle=":", linewidth=0.7)
 ax.set_xlabel(r"delay  $\tau$")
 ax.set_ylabel("probability")
-ax.set_title(f"(a) detection events vs delay  (N = {mm_N};  markers = mrmustard)")
+ax.set_title(f"(a) detection events vs delay  (M = {mm_M};  markers = mrmustard)")
 ax.set_ylim(-0.02, 0.55)
 ax.legend(fontsize=8, loc="center right")
 ax.grid(alpha=0.3)
 
-# (b) P(both arms, same pol) vs τ for several N — the τ-dependent signal
+# (b) P(both arms, same pol) vs τ for several M — the τ-dependent signal
 ax = axes[1]
-N_curves = [2, 4, 6, 14]
-N_to_color = dict(zip(N_curves, plt.cm.viridis(np.linspace(0.15, 0.85, len(N_curves)))))
-for N in N_curves:
-    p_same = np.array([detection_probs_analytic(t, N)["coinc, same pol"] for t in tau_grid])
-    ax.plot(tau_grid, p_same, color=N_to_color[N], lw=1.4, label=f"N = {N}")
-ax.plot(mm_taus, mm_probs[:, 0], "o", color=N_to_color[mm_N],
+M_curves = [3, 5, 7, 15]
+M_to_color = dict(zip(M_curves, plt.cm.viridis(np.linspace(0.15, 0.85, len(M_curves)))))
+for M in M_curves:
+    p_same = np.array([detection_probs_analytic(t, M)["coinc, same pol"] for t in tau_grid])
+    ax.plot(tau_grid, p_same, color=M_to_color[M], lw=1.4, label=f"M = {M}")
+ax.plot(mm_taus, mm_probs[:, 0], "o", color=M_to_color[mm_M],
         markeredgecolor="black", markeredgewidth=0.8, markersize=7,
-        linestyle="none", label=f"mm  N = {mm_N}")
+        linestyle="none", label=f"mm  M = {mm_M}")
 ax.axhline(0.25, color="gray", linestyle="--", linewidth=0.7,
            label=r"asymptote $1/4$")
 for k in [-1, 0, 1]:

@@ -84,126 +84,380 @@ with $|P_C P_A P_B\rangle = |P\rangle_C |P\rangle_A |P\rangle_B$. Each term has
 weight $|\alpha|^2/2$ or $|\beta|^2/2$ in the probability budget, and
 together they sum to 1.
 
-**Why the four terms don't interfere.** After the BS, classify each
-term's output Fock support by two labels: (i) the polarization of the
-B-side photon, (ii) the polarization composition at the $\alpha\beta$
-ports.
+## Mode operators and BS transformations
 
-| Term | $|\psi\rangle_{\text{in}}$ | $\alpha\beta$ side after BS | B side |
+To do the explicit algebra term by term we need names for the post-BS
+output modes. Define
+$c^\dagger_{P,k}$ to create a photon at output port $\alpha$ with
+polarization $P$ and frequency $k$, and $d^\dagger_{P,k}$ likewise for
+port $\beta$. (The port labels $\alpha, \beta$ here are the *spatial*
+output labels and are a different role from the qubit amplitudes
+$\alpha, \beta$ in $|\psi\rangle_C$ — port labels appear only as operator
+subscripts, qubit amplitudes only as standalone prefactors.)
+
+The Heisenberg-picture transformations for the BS, combined with the
+delay phase $\phi_k = \omega_k\,\tau$ on every C mode:
+
+$$
+a^\dagger_{C,P,k} \;\longrightarrow\; \frac{e^{i\phi_k}}{\sqrt{2}}\,\bigl(c^\dagger_{P,k} + d^\dagger_{P,k}\bigr),
+\qquad
+a^\dagger_{A,P,k} \;\longrightarrow\; \frac{1}{\sqrt{2}}\,\bigl(c^\dagger_{P,k} - d^\dagger_{P,k}\bigr),
+$$
+
+applied independently for each polarization $P$ and each frequency $k$.
+Bob-side operators $a^\dagger_{B,P,k}$ are untouched. With these in
+hand, the recipe for each Term is: expand every $|P\rangle_X$ into its
+$M = N+1$ frequency modes, substitute, then read off the output state.
+
+## Term 1: $\alpha\,|HHH\rangle/\sqrt{2}$ — same-pol HOM at H
+
+Expanding the wavepackets:
+
+$$
+|HHH\rangle \;=\; \frac{1}{M^{3/2}} \sum_{k_C, k_A, k_B}
+a^\dagger_{C,H,k_C}\, a^\dagger_{A,H,k_A}\, a^\dagger_{B,H,k_B}\,|0\rangle.
+$$
+
+Apply delay+BS:
+
+$$
+|HHH\rangle \;\longrightarrow\;
+\frac{1}{2\,M^{3/2}} \sum_{k_C, k_A, k_B} e^{i\phi_{k_C}}
+\bigl(c^\dagger_{H,k_C} + d^\dagger_{H,k_C}\bigr)\bigl(c^\dagger_{H,k_A} - d^\dagger_{H,k_A}\bigr)\,a^\dagger_{B,H,k_B}\,|0\rangle.
+$$
+
+Expand the BS product:
+
+$$
+\bigl(c^\dagger_{H,k_C} + d^\dagger_{H,k_C}\bigr)\bigl(c^\dagger_{H,k_A} - d^\dagger_{H,k_A}\bigr)
+\;=\;
+c^\dagger_{H,k_C} c^\dagger_{H,k_A}
+\;-\; c^\dagger_{H,k_C} d^\dagger_{H,k_A}
+\;+\; d^\dagger_{H,k_C} c^\dagger_{H,k_A}
+\;-\; d^\dagger_{H,k_C} d^\dagger_{H,k_A}.
+$$
+
+Four output configurations: two coincidence terms ($c^\dagger d^\dagger$
+and $d^\dagger c^\dagger$, one photon per port), and two bunching terms
+($c^\dagger c^\dagger$ at $\alpha$, $-d^\dagger d^\dagger$ at $\beta$).
+
+**The HOM cancellation.** Both photons are H, so they are
+indistinguishable in their polarization mode — once they leave the BS,
+no photon carries a label "I came from C" or "I came from A". The
+operator pair
+
+$$
+(k_C = k_c,\,k_A = k_d)\,:\;\; -c^\dagger_{H,k_c} d^\dagger_{H,k_d},
+\qquad
+(k_C = k_d,\,k_A = k_c)\,:\;\; +d^\dagger_{H,k_d} c^\dagger_{H,k_c}
+= +c^\dagger_{H,k_c} d^\dagger_{H,k_d}
+$$
+
+both contribute to the *same* output Fock state
+$|1_{H,k_c}\rangle_\alpha\,|1_{H,k_d}\rangle_\beta$ — and they
+interfere. (The BS operators commute since they act on different modes
+and ports.) Collecting the two contributions and relabeling dummy
+indices in the second:
+
+$$
+\sum_{k_C, k_A} e^{i\phi_{k_C}}\bigl(-c^\dagger_{H,k_C} d^\dagger_{H,k_A} + c^\dagger_{H,k_A} d^\dagger_{H,k_C}\bigr)
+\;=\;
+\sum_{k_c, k_d}\,\bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr)\,c^\dagger_{H,k_c} d^\dagger_{H,k_d}.
+$$
+
+This is exactly the multi-mode HOM-dip structure (compare lines 222–238
+of [fock_space_HOM_dip_Gemini.md](fock_space_HOM_dip_Gemini.md)). With
+Term 1's prefactor $\alpha/\sqrt{2}$ included, and the trivial B-side
+sum over $k_B$ kept explicit, the coincidence part of Term 1 in the
+post-BS state is
+
+$$
+|\Psi^{(1)}_{\text{coinc}}\rangle
+\;=\;
+\frac{\alpha}{2\sqrt{2}\,M^{3/2}}\sum_{k_c, k_d, k_B}
+\bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr)\,
+c^\dagger_{H,k_c} d^\dagger_{H,k_d}\,a^\dagger_{B,H,k_B}\,|0\rangle.
+$$
+
+The bunching part is the other two operator terms:
+$+c^\dagger_{H,k_C} c^\dagger_{H,k_A}$ (both H at $\alpha$) and
+$-d^\dagger_{H,k_C} d^\dagger_{H,k_A}$ (both H at $\beta$) — same
+polarization, one arm.
+
+## Term 4: $-\beta\,|VVV\rangle/\sqrt{2}$ — same-pol HOM at V
+
+Identical to Term 1 with $H \to V$ and prefactor $-\beta/\sqrt{2}$:
+
+$$
+|\Psi^{(4)}_{\text{coinc}}\rangle
+\;=\;
+-\frac{\beta}{2\sqrt{2}\,M^{3/2}}\sum_{k_c, k_d, k_B}
+\bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr)\,
+c^\dagger_{V,k_c} d^\dagger_{V,k_d}\,a^\dagger_{B,V,k_B}\,|0\rangle.
+$$
+
+The bunching part puts both V photons at the same port — same
+polarization, one arm.
+
+## Term 2: $-\alpha\,|HVV\rangle/\sqrt{2}$ — different polarization sectors
+
+Now the C photon is H and the A photon is V — they sit in different
+polarization sectors and go through independent BSs that share no
+operators:
+
+$$
+|HVV\rangle \;=\; \frac{1}{M^{3/2}} \sum_{k_C, k_A, k_B}
+a^\dagger_{C,H,k_C}\, a^\dagger_{A,V,k_A}\, a^\dagger_{B,V,k_B}\,|0\rangle,
+$$
+
+$$
+|HVV\rangle \;\longrightarrow\;
+\frac{1}{2\,M^{3/2}}\sum_{k_C, k_A, k_B} e^{i\phi_{k_C}}
+\bigl(c^\dagger_{H,k_C} + d^\dagger_{H,k_C}\bigr)\bigl(c^\dagger_{V,k_A} - d^\dagger_{V,k_A}\bigr)\,a^\dagger_{B,V,k_B}\,|0\rangle.
+$$
+
+Expand the BS product:
+
+$$
+\bigl(c^\dagger_{H,k_C} + d^\dagger_{H,k_C}\bigr)\bigl(c^\dagger_{V,k_A} - d^\dagger_{V,k_A}\bigr)
+=
+c^\dagger_{H,k_C} c^\dagger_{V,k_A}
+- c^\dagger_{H,k_C} d^\dagger_{V,k_A}
++ d^\dagger_{H,k_C} c^\dagger_{V,k_A}
+- d^\dagger_{H,k_C} d^\dagger_{V,k_A}.
+$$
+
+The four output configurations are now labeled by *polarization-port pairs*:
+
+- $+c^\dagger_{H,k_C} c^\dagger_{V,k_A}$ — HV at $\alpha$, frequencies $(k_C, k_A)$ — *1-arm, diff pol*
+- $-c^\dagger_{H,k_C} d^\dagger_{V,k_A}$ — H at $\alpha$ freq $k_C$, V at $\beta$ freq $k_A$ — *coinc, diff pol*
+- $+d^\dagger_{H,k_C} c^\dagger_{V,k_A}$ — H at $\beta$ freq $k_C$, V at $\alpha$ freq $k_A$ — *coinc, diff pol*
+- $-d^\dagger_{H,k_C} d^\dagger_{V,k_A}$ — HV at $\beta$, frequencies $(k_C, k_A)$ — *1-arm, diff pol*
+
+**No HOM cancellation.** Unlike Term 1, the two photons are now
+distinguishable by polarization — one is always the H photon (from C,
+carrying the delay phase), the other always the V photon (from A, no
+phase). Each $(k_C, k_A)$ pair therefore lands in its *own* output Fock
+state, and **different $(k_C, k_A)$ pairs do not interfere**.
+
+The immediate consequence: the delay phase $e^{i\phi_{k_C}}$ rides on
+each amplitude as a per-Fock-state global phase and **disappears
+entirely when we take $|\cdot|^2$**. Term 2 (and by symmetry Term 3)
+will give *$\tau$-independent* probabilities for every detection event.
+
+## Term 3: $\beta\,|VHH\rangle/\sqrt{2}$ — symmetric to Term 2
+
+C is V (with delay), A is H. Same structure:
+
+$$
+|VHH\rangle \;\longrightarrow\;
+\frac{1}{2\,M^{3/2}}\sum_{k_C, k_A, k_B} e^{i\phi_{k_C}}
+\bigl(c^\dagger_{V,k_C} + d^\dagger_{V,k_C}\bigr)\bigl(c^\dagger_{H,k_A} - d^\dagger_{H,k_A}\bigr)\,a^\dagger_{B,H,k_B}\,|0\rangle.
+$$
+
+Same four output configurations as Term 2 (HV coincidences and HV
+bunching), all diff-pol, all $\tau$-independent in probability.
+
+## Why the four Terms don't interfere
+
+Reading off the post-BS Fock supports from the four derivations above:
+
+| Term | $\vert\psi\rangle_{\text{in}}$ | $\alpha\beta$ side after BS | B side |
 |------|---------------------------|---------------------------|--------|
-| 1 | $\alpha\,|HHH\rangle$  | two H photons              | one H |
-| 2 | $-\alpha\,|HVV\rangle$ | one H + one V photon       | one V |
-| 3 | $\beta\,|VHH\rangle$   | one H + one V photon       | one H |
-| 4 | $-\beta\,|VVV\rangle$  | two V photons              | one V |
+| 1 | $\alpha\,\vert HHH\rangle$  | two H photons         | one H photon |
+| 2 | $-\alpha\,\vert HVV\rangle$ | one H + one V photon  | one V photon |
+| 3 | $\beta\,\vert VHH\rangle$   | one H + one V photon  | one H photon |
+| 4 | $-\beta\,\vert VVV\rangle$  | two V photons         | one V photon |
 
-Pairwise: any two terms differ either on the B side (terms 2 vs 3, 1 vs
-2, etc.) or on the $\alpha\beta$ polarization composition (terms 1 vs
-3, 1 vs 4, 2 vs 4). Since polarization-mode photon-number is preserved
-by the BS, the four output sectors are **mutually orthogonal in Fock
-space**. There is no interference between them, and probabilities of
-detection events add classically with weights
-$|\alpha|^2/2$, $|\alpha|^2/2$, $|\beta|^2/2$, $|\beta|^2/2$.
+Any pair of Terms differs either on the B side polarization or on the
+$\alpha\beta$-port polarization composition. The BS preserves
+polarization-mode photon number (the H and V sectors evolve completely
+independently), so the four post-BS supports are **pairwise orthogonal
+in Fock space**. There is no cross-Term interference, and totals add
+classically across the four contributions.
 
-This decoupling is the master idea — every "constant 1/4" or "$\mathrm{HOM}/2$"
-below comes from summing four independent contributions.
+## $P_{\text{coinc, same}}(\tau) = \mathrm{HOM}(\tau)/2$
 
-**Each term's BS analysis** (for the *gross* probabilities — frequency
-phases will matter only when we get to fidelity):
-
-- **Term 1 (HHH).** Two H photons interfere via HOM in the H sector;
-  the V sector is empty. Coincidence (one H at $\alpha$, one H at $\beta$)
-  occurs with probability $\mathrm{HOM}(\tau)$; bunching (both H at one port)
-  with probability $1-\mathrm{HOM}(\tau)$. Polarization is *same* (both H)
-  in either case.
-
-- **Term 4 (VVV).** Symmetric to Term 1 with V instead of H. Same
-  probabilities; polarization is *same* (both V).
-
-- **Term 2 (HVV).** The C photon is H, the A photon is V; they sit in
-  different polarization sectors and **don't interfere**. Each photon
-  goes 50/50 between $\alpha$ and $\beta$, independently. The four
-  outcomes (H@$\alpha$,V@$\alpha$), (H@$\alpha$,V@$\beta$), (H@$\beta$,
-  V@$\alpha$), (H@$\beta$,V@$\beta$) each have probability $1/4$.
-  So conditional probabilities are: coincidence $1/2$, bunching $1/2$;
-  polarization is always *different* (one H, one V).
-
-- **Term 3 (VHH).** Symmetric to Term 2 with the roles of $H$ and $V$
-  swapped between C and A. Same conditional probabilities; always *diff*
-  polarization.
-
-The four detection categories now follow by mixing.
-
-## $P_\text{coinc, same}(\tau) = \mathrm{HOM}(\tau)/2$
-
-Only Terms 1 and 4 contribute (only they have same polarization at
-$\alpha\beta$), and each contributes its HOM coincidence rate:
+Only Terms 1 and 4 contribute (the same-polarization sectors at
+$\alpha\beta$). Take Term 1. The amplitude for each output Fock state
+$|1_{H,k_c}\rangle_\alpha\,|1_{H,k_d}\rangle_\beta\,|1_{H,k_B}\rangle_B$
+is
 
 $$
-P_\text{coinc, same}(\tau)
-= \frac{|\alpha|^2}{2}\cdot \mathrm{HOM}(\tau)
-+ \frac{|\beta|^2}{2}\cdot \mathrm{HOM}(\tau)
-= \frac{\mathrm{HOM}(\tau)}{2}.
+\text{amp}^{(1)}_{k_c, k_d, k_B}
+\;=\;
+\frac{\alpha}{2\sqrt{2}\,M^{3/2}}\,\bigl(e^{i\phi_{k_d}} - e^{i\phi_{k_c}}\bigr).
 $$
 
-The $|\alpha|^2 + |\beta|^2 = 1$ collapse means the result is independent
-of which qubit was input. Physically: timing jitter degrades the HOM
-interference for the same-polarization sectors, leaking probability mass
-that would otherwise have bunched. At $\tau = 0$ this is zero (perfect
-HOM bunching); at full distinguishability ($\mathrm{HOM} = 1/2$) it
-saturates at $1/4$.
-
-## $P_\text{coinc, diff}(\tau) = 1/4$
-
-Only Terms 2 and 3 contribute (they have $1H+1V$ at $\alpha\beta$),
-and each contributes its $1/2$ "two independent photons split between
-two ports" probability:
+Squaring, using $|e^{ix} - e^{iy}|^2 = 2 - 2\cos(x - y)$, and noting
+that $\phi_{k_d} - \phi_{k_c} = (k_d - k_c)\,\Delta\omega\,\tau$ (the
+carrier $\omega_0$ cancels in the difference):
 
 $$
-P_\text{coinc, diff}(\tau)
-= \frac{|\alpha|^2}{2}\cdot \frac{1}{2}
-+ \frac{|\beta|^2}{2}\cdot \frac{1}{2}
-= \frac{1}{4}.
+\bigl|\text{amp}^{(1)}\bigr|^2
+\;=\;
+\frac{|\alpha|^2}{8\,M^3}\,\bigl(2 - 2\cos((k_d - k_c)\Delta\omega\,\tau)\bigr).
 $$
 
-This is constant in $\tau$ — Terms 2 and 3 have *no HOM interference*
-because the C and A photons are in orthogonal polarization sectors and
-go through independent BSs. Timing jitter has nothing to interfere with,
-so it leaves these outcomes alone.
-
-## $P_\text{1-arm, same}(\tau) = (1 - \mathrm{HOM}(\tau))/2$
-
-The complement of $P_\text{coinc, same}$ within the same-polarization
-sectors of Terms 1 and 4 (since Terms 2, 3 contribute nothing to "same
-polarization"):
+Different Fock states are orthogonal, so the total Term-1 coincidence
+probability is the straight sum over $(k_c, k_d, k_B)$, each running
+over $M$ values:
 
 $$
-P_\text{1-arm, same}(\tau)
-= \frac{|\alpha|^2}{2}\cdot (1 - \mathrm{HOM}(\tau))
-+ \frac{|\beta|^2}{2}\cdot (1 - \mathrm{HOM}(\tau))
-= \frac{1 - \mathrm{HOM}(\tau)}{2}.
+P^{(1)}_{\text{coinc, same}}
+\;=\;
+\sum_{k_c, k_d, k_B}\frac{|\alpha|^2}{8\,M^3}\,\bigl(2 - 2\cos((k_d - k_c)\Delta\omega\,\tau)\bigr)
+\;=\;
+\frac{|\alpha|^2}{4\,M^2}\,\Bigl(M^2 - \sum_{k_c, k_d}\cos((k_d - k_c)\Delta\omega\,\tau)\Bigr).
 $$
 
-This is the HOM-bunching peak: at $\tau = 0$ it equals $1/2$ (every
-HHH/VVV event produces bunching at one port); it falls to $1/4$ at full
-distinguishability.
-
-## $P_\text{1-arm, diff}(\tau) = 1/4$
-
-Symmetric to $P_\text{coinc, diff}$ — only Terms 2, 3 contribute, each
-with conditional bunching probability $1/2$:
+The double cosine sum collapses to a Dirichlet kernel squared:
 
 $$
-P_\text{1-arm, diff}(\tau)
-= \frac{|\alpha|^2}{2}\cdot \frac{1}{2}
-+ \frac{|\beta|^2}{2}\cdot \frac{1}{2}
-= \frac{1}{4}.
+\sum_{k_c, k_d}\cos\bigl((k_d - k_c)\Delta\omega\,\tau\bigr)
+\;=\;
+\Re\Bigl[\Bigl(\sum_{k_d} e^{i k_d \Delta\omega\tau}\Bigr)\Bigl(\sum_{k_c} e^{-i k_c \Delta\omega\tau}\Bigr)\Bigr]
+\;=\;
+\Bigl|\sum_k e^{i k \Delta\omega\,\tau}\Bigr|^2
+\;=\;
+D_N(\Delta\omega\,\tau)^2.
 $$
 
-Same logic as $P_\text{coinc, diff}$: no HOM interference is available
-to these terms, so the rate is $\tau$-independent.
+So
 
-The four detection categories sum to 1 for any $\tau$:
-$\mathrm{HOM}/2 + 1/4 + (1-\mathrm{HOM})/2 + 1/4 = 1$. ✓
+$$
+P^{(1)}_{\text{coinc, same}}
+\;=\;
+\frac{|\alpha|^2}{4}\,\Bigl(1 - \frac{D_N^2}{M^2}\Bigr)
+\;=\;
+\frac{|\alpha|^2}{2}\,\mathrm{HOM}(\tau).
+$$
+
+By the H↔V symmetry between Terms 1 and 4, $P^{(4)}_{\text{coinc, same}} = |\beta|^2\,\mathrm{HOM}(\tau)/2$.
+The Fock supports of Terms 1 and 4 are orthogonal (H photons vs V
+photons at $\alpha\beta$), so total adds:
+
+$$
+P_{\text{coinc, same}}(\tau)
+\;=\;
+\frac{(|\alpha|^2 + |\beta|^2)\,\mathrm{HOM}(\tau)}{2}
+\;=\;
+\frac{\mathrm{HOM}(\tau)}{2}.
+$$
+
+The $|\alpha|^2 + |\beta|^2 = 1$ collapse is what makes the answer
+independent of the input qubit's amplitudes. At $\tau = 0$ this is zero
+(perfect HOM bunching, every event ends up at one port); at full
+distinguishability $\mathrm{HOM} = 1/2$ it saturates at $1/4$.
+
+## $P_{\text{coinc, diff}}(\tau) = 1/4$
+
+Only Terms 2 and 3 contribute. Take Term 2. Its two coincidence
+configurations contribute amplitudes (each with a per-Fock-state global
+delay phase that vanishes in the squared modulus)
+
+$$
+\text{amp}^{(2)}_{\text{H@}\alpha,\text{V@}\beta}
+\;=\;
+-\,\frac{\alpha\,e^{i\phi_{k_C}}}{2\sqrt{2}\,M^{3/2}},
+\qquad
+\text{amp}^{(2)}_{\text{H@}\beta,\text{V@}\alpha}
+\;=\;
++\,\frac{\alpha\,e^{i\phi_{k_C}}}{2\sqrt{2}\,M^{3/2}},
+$$
+
+each multiplied by Bob's $a^\dagger_{B,V,k_B}\,|0\rangle$. Each triple
+$(k_C, k_A, k_B)$ labels a distinct output Fock state, and the two
+configurations (H@α,V@β) vs (H@β,V@α) also produce different Fock
+states — so **there is no interference**, and
+
+$$
+\bigl|\text{amp}^{(2)}\bigr|^2 \;=\; \frac{|\alpha|^2}{8\,M^3}.
+$$
+
+The two configurations contribute $M^3$ Fock states each (one per
+$(k_C, k_A, k_B)$ value), giving
+
+$$
+P^{(2)}_{\text{coinc, diff}}
+\;=\;
+2 \cdot M^3 \cdot \frac{|\alpha|^2}{8\,M^3}
+\;=\;
+\frac{|\alpha|^2}{4}.
+$$
+
+By H↔V symmetry between Terms 2 and 3, $P^{(3)}_{\text{coinc, diff}} = |\beta|^2/4$.
+Terms 2 and 3 are orthogonal in the output Fock space (Term 2 has Bob
+in a V wavepacket, Term 3 has Bob in H), so the probabilities add:
+
+$$
+P_{\text{coinc, diff}}(\tau)
+\;=\;
+\frac{|\alpha|^2 + |\beta|^2}{4}
+\;=\;
+\frac{1}{4}.
+$$
+
+**Independent of $\tau$**: with H and V photons distinguishable, the
+delay phase has no interfering partner to play against, and timing
+jitter leaves these outcomes alone.
+
+## $P_{\text{1-arm, same}}(\tau) = (1 - \mathrm{HOM}(\tau))/2$
+
+This is the complementary part of Terms 1 and 4 — both photons at the
+same output port with the same polarization (both H@α, both H@β, both
+V@α, or both V@β). Photon-number conservation gives the answer without
+having to rewrite the bunching algebra: Term 1's total weight in the
+post-BS state equals its weight in the input, $|\alpha|^2/2$, and its
+coincidence part is $|\alpha|^2\,\mathrm{HOM}(\tau)/2$, so
+
+$$
+P^{(1)}_{\text{1-arm, same}}
+\;=\;
+\frac{|\alpha|^2}{2} - \frac{|\alpha|^2\,\mathrm{HOM}(\tau)}{2}
+\;=\;
+\frac{|\alpha|^2\,(1 - \mathrm{HOM}(\tau))}{2}.
+$$
+
+Term 4 likewise gives $|\beta|^2 (1 - \mathrm{HOM})/2$. Adding:
+
+$$
+P_{\text{1-arm, same}}(\tau)
+\;=\;
+\frac{(|\alpha|^2 + |\beta|^2)\,(1 - \mathrm{HOM}(\tau))}{2}
+\;=\;
+\frac{1 - \mathrm{HOM}(\tau)}{2}.
+$$
+
+At $\tau = 0$ this is $1/2$ (perfect HOM bunching: every same-pol event
+ends up at one port); at full distinguishability it falls to $1/4$,
+matching the diff-pol channels.
+
+## $P_{\text{1-arm, diff}}(\tau) = 1/4$
+
+Same logic as $P_{\text{coinc, diff}}$ applied to the bunching part of
+Terms 2 and 3. Term 2's two bunching configurations
+($+c^\dagger_{H} c^\dagger_{V}$ at $\alpha$, $-d^\dagger_{H} d^\dagger_{V}$ at $\beta$)
+each contribute $M^3$ Fock states with
+$|\text{amp}|^2 = |\alpha|^2/(8\,M^3)$ and no interference. Summed,
+$P^{(2)}_{\text{1-arm, diff}} = |\alpha|^2/4$, and Term 3 gives
+$|\beta|^2/4$, so
+
+$$
+P_{\text{1-arm, diff}}(\tau)
+\;=\;
+\frac{|\alpha|^2 + |\beta|^2}{4}
+\;=\;
+\frac{1}{4}.
+$$
+
+$\tau$-independent for the same reason as $P_{\text{coinc, diff}}$.
+
+**Sanity check.** Sum of the four categories at every $\tau$:
+$\mathrm{HOM}/2 + 1/4 + (1 - \mathrm{HOM})/2 + 1/4 = 1$. ✓ All the
+$\tau$-dependence lives in the same-polarization channels (Terms 1 and
+4, with their HOM cancellation), and these are exactly the channels the
+BS Bell-measurement uses to distinguish $\Psi^{\pm}$ from $\Phi^{\pm}$.
 
 ## $F(\tau) = 1 - 4\,|\alpha|^2|\beta|^2 \cdot \mathrm{HOM}(\tau)$
 
