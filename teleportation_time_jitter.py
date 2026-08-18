@@ -278,5 +278,5 @@ ax.grid(alpha=0.3)
 plt.suptitle(rf"Bell-measurement with input-qubit timing jitter  "
              rf"($\omega_0/\Delta\omega = {OMEGA_0/DELTA_OMEGA:.0f}$)", fontsize=26, fontweight='bold')
 plt.tight_layout(rect=[0, 0, 1, 0.92], pad=1.0)
-plt.savefig("results/teleportation_time_jitter.png", dpi=150)
+plt.savefig("results/teleportation_time_jitter.svg")
 print("Plot saved to results/teleportation_time_jitter.png")

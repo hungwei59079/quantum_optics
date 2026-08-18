@@ -367,5 +367,5 @@ ax.grid(alpha=0.3)
 
 plt.suptitle(r"Post-selected teleportation fidelity vs input-qubit timing jitter", fontsize=26, fontweight='bold')
 plt.tight_layout(rect=[0, 0, 1, 0.92], pad=1.0)
-plt.savefig("results/teleportation_time_jitter_fidelity.png", dpi=150)
+plt.savefig("results/teleportation_time_jitter_fidelity.svg")
 print("Plot saved to results/teleportation_time_jitter_fidelity.png")

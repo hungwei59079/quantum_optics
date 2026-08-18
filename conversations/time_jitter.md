@@ -303,7 +303,9 @@ The Fock supports of Terms 1 and 4 are orthogonal (H photons vs V
 photons at $\alpha\beta$), so total adds:
 
 $$
-P_{\text{coinc, same}}(\tau) = \frac{(|\alpha|^2 + |\beta|^2)\,\mathrm{HOM}(\tau)}{2} = \frac{\mathrm{HOM}(\tau)}{2}.
+P_{\text{coinc, same}}(\tau)
+= \frac{|\alpha|^2 + |\beta|^2}{4}\left(1 - \frac{1}{M^2}\left[\frac{\sin\!\bigl(M\,\Delta\omega\,\tau/2\bigr)}{\sin(\Delta\omega\,\tau/2)}\right]^2\right)
+= \frac{1}{4}\left(1 - \frac{1}{M^2}\left[\frac{\sin\!\bigl(M\,\Delta\omega\,\tau/2\bigr)}{\sin(\Delta\omega\,\tau/2)}\right]^2\right).
 $$
 
 The $|\alpha|^2 + |\beta|^2 = 1$ collapse is what makes the answer
